@@ -1,1 +1,3 @@
-# ShaneeAndYotam_DescimateThePrpject
+# ShaneeAndYotam_DescimateTheProject
+
+### Authors: Shanee, Yotam
