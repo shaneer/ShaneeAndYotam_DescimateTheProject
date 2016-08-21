@@ -6,6 +6,7 @@
 ## General:
 - [x] Be AWESOME
 - [ ] Build project skeleton
+- [ ] Add BPQ
 - [ ] Add SPPoint from assginment 3
 - [ ] Add SPLogger from assginment 3
 
