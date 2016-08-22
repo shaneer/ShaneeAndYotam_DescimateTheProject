@@ -11,6 +11,8 @@
 
 const int DIM = 2;
 
+// TODO: Handle edge cases on all test functions.
+
 SPPoint* GeneratePointArray() {
   SPPoint* arr = (SPPoint*)malloc(sizeof(SPPoint)*5);
   double* data = (double*)malloc(DIM*sizeof(double));
@@ -74,7 +76,7 @@ int SPKDArrayInitTest() {
 
   for (int i=0;i<5;i++) spPointDestroy(arr[i]);
   free(arr);
-  SPKDArrayDestroy(kdArr);
+  spKDArrayDestroy(kdArr);
   return 0;
 }
 
@@ -118,13 +120,13 @@ int SPKDArraySplitTest() {
 
   for (int i=0;i<5;i++) spPointDestroy(arr[i]);
   free(arr);
-  SPKDArrayDestroy(kdArr);
+  spKDArrayDestroy(kdArr);
   return 0;
 }
 
 int main(int argc, char const *argv[]) {
   RUN_TEST(SPKDArrayInitTest);
   RUN_TEST(SPKDArraySplitTest);
-  
+
   return 0;
 }
