@@ -21,5 +21,3 @@
 1. Make sure that the logger was set at the beginning of the main function.
 2. If a configuration file contains multiple errors, you should print the first as error which appears
 first in the configuration file.
-
-TEST
