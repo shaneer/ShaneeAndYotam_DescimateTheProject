@@ -130,14 +130,16 @@ int GetNumberOfPoints(SPKDArray kdArr) {
   return kdArr->size;
 }
 
-int spKDArrayDestroy(SPKDArray spkdArr){
-  if (!spkdArr) return NULL;
+void spKDArrayDestroy(SPKDArray spkdArr){
+  if (!spkdArr) {
+    return;
+  }
   for (int i=0;i<spkdArr->size;i++) spPointDestroy(spkdArr->points[i]);
   free(spkdArr->points);
   free(*(spkdArr->kdArray));
   free(spkdArr->kdArray);
   free(spkdArr);
-  return 0;
+  return;
 }
 
 SPKDArray* Split(SPKDArray kdArr, int coor) {
