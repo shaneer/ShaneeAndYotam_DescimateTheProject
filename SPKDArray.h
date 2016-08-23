@@ -52,7 +52,6 @@ SPKDArray Init(SPPoint* arr, int size);
  */
  int GetNumberOfPoints(SPKDArray kdArr);
 
-
 /*
  *  Destroy the SPKDArray given and clear it's memory usage.
  */
