@@ -33,7 +33,7 @@ SPKDArray Init(SPPoint* arr, int size);
  SPKDArray* Split(SPKDArray kdArr, int coor);
 
 /*
- *  Getter for the points array.
+ *  Return a copy of the point array
  */
  SPPoint* GetPointsArray(SPKDArray kdArr);
 
