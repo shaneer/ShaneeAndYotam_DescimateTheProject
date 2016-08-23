@@ -85,7 +85,7 @@ SPKDArray Init(SPPoint* arr, int size) {
   }
 
   // free the temporary row
-  free(rowTmpV)
+  free(rowTmpV);
   free(rowTmp);
   return spkdArr;
 }
