@@ -68,7 +68,6 @@ int SPKDArrayInitTest() {
   SPKDArray kdArr;
   SPPoint* arr = GeneratePointArray();
   kdArr = Init(arr, SIZE);
-  // spKDArrayPrint2D(kdArr);
   ASSERT_TRUE(kdArr != NULL);
   ASSERT_TRUE(SPKDArrayGetPointsArrayTest(kdArr, arr,SIZE));
   int* x_ind = (int*)malloc(SIZE*sizeof(int));
