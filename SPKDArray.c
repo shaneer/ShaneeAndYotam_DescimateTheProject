@@ -6,6 +6,7 @@
 #include "SPKDArray.h"
 #include "SPPoint.h"
 #include <stdlib.h>
+#include <stdio.h>
 #include <assert.h>
 
 struct sp_kd_array {
@@ -26,12 +27,13 @@ SPKDArray Init(SPPoint* arr, int size) {
 
   int i, j;
 
+  // memory allocation
+  SPKDArray spkdArr = (SPKDArray)malloc(sizeof(struct sp_kd_array));
+
   // dim and size
   spkdArr->dim = spPointGetDimension(arr[0]);
   spkdArr->size = size;
 
-  // memory allocation
-  SPKDArray spkdArr = (SPKDArray)malloc(sizeof(struct sp_kd_array));
   spkdArr->points = (SPPoint*)calloc(spkdArr->size,sizeof(SPPoint));
   spkdArr->kdArray = (int**)calloc(spkdArr->dim,sizeof(int*));
   int* kdArrayV = (int*)calloc((spkdArr->dim)*spkdArr->size, sizeof(int));
@@ -96,9 +98,10 @@ SPKDArray Init(SPPoint* arr, int size) {
 }
 
 SPPoint* GetPointsArray(SPKDArray spkdArr) {
-  SPPoint* cpy = (SPPoint*)malloc(sizeof(spkdArr->points));
+  if (!spkdArr) return NULL;
+  SPPoint* cpy = (SPPoint*)calloc(spkdArr->size, sizeof(SPPoint));
   for (int i=0; i<spkdArr->size; i++) {
-    cpy[i] = spPointCopy(spkdArr->points[i]);
+    cpy[i] = spPointCopy((spkdArr->points)[i]);
   }
   return cpy;
 }
@@ -126,4 +129,32 @@ int spKDArrayDestroy(SPKDArray spkdArr){
 
 SPKDArray* Split(SPKDArray kdArr, int coor) {
   return NULL;
+}
+
+void spKDArrayPrint2D(SPKDArray spkdArr) {
+  char* m1 = "SPKDArray\n--------------\n";
+  char* m2 = "- Points:\n";
+  char* m3 = "- Size:\t";
+  char* m4 = "- Dim:\t";
+  char* m5 = "- Matrix:\n";
+
+  printf("%s%s\t\t", m1,m2);
+  for (int i=0; i<spkdArr->size; i++) {
+    printf("%d\t", i);
+  }
+  printf("\n\t\t");
+  for (int i=0; i<spkdArr->size; i++) {
+    printf("(%.0f, %.0f)\t", spPointGetAxisCoor((spkdArr->points)[i],0), spPointGetAxisCoor((spkdArr->points)[i],1));
+  }
+  printf("%s%d\n", m3, spkdArr->size);
+  printf("%s%d\n", m4, spkdArr->dim);
+  printf("%s", m5);
+  for (int i=0;i<spkdArr->dim;i++) {
+    printf("\n\t\t");
+    for (int j=0;j<spkdArr->size; j++) {
+      printf("%d\t", (spkdArr->kdArray)[i][j]);
+    }
+  }
+  printf("\n");
+  return;
 }
