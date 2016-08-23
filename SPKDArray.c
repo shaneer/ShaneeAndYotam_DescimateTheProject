@@ -25,7 +25,7 @@ SPKDArray Init(SPPoint* arr, int size) {
   if (size <= 0) return NULL; // incorrect size param
 
   int i, j;
-  SPKDArray spkdArr = (SPKDArray)malloc(sizeof(SPKDArray*));
+  SPKDArray spkdArr = (SPKDArray)malloc(sizeof(struct sp_kd_array));
   spkdArr->points = (SPPoint*)malloc(sizeof(arr));
   spkdArr->kdArray = (int**)malloc((spkdArr->dim)*sizeof(int*));
   int* kdArrayV = (int*)malloc((spkdArr->dim)*size*sizeof(int));
