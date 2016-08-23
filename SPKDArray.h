@@ -57,4 +57,4 @@ SPKDArray Init(SPPoint* arr, int size);
  */
  int SPKDArrayDestroy(SPKDArray kdArr);
 
-#endif // SPKDRAAY_H
+#endif // SPKDRAAY_H_
