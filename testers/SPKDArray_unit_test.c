@@ -41,8 +41,10 @@ int SPKDArrayGetPointsArrayTest(SPKDArray kdArr, SPPoint* arr, int size) {
     SPPoint* arr_cpy = GetPointsArray(kdArr);
     for (int i=0;i<size;i++) {
       ASSERT_TRUE(spPointL2SquaredDistance(arr[i],arr_cpy[i]) == 0);
+      spPointDestroy(arr_cpy[i]);
     }
     ASSERT_FALSE(GetPointsArray(NULL));
+    free(arr_cpy);
     return true;
 }
 
@@ -88,6 +90,8 @@ int SPKDArrayInitTest() {
 
   for (int i=0;i<SIZE;i++) spPointDestroy(arr[i]);
   free(arr);
+  free(x_ind);
+  free(y_ind);
   spKDArrayDestroy(kdArr);
   return true;
 }
@@ -101,6 +105,7 @@ int SPKDArraySplitTest() {
   ASSERT_TRUE(kdarr_split != NULL);
   SPKDArray kdLeft = kdarr_split[0];
   SPKDArray kdRight = kdarr_split[1];
+  free(kdarr_split);
   ASSERT_TRUE(kdLeft != NULL);
   ASSERT_TRUE(kdRight != NULL);
 
@@ -125,6 +130,7 @@ int SPKDArraySplitTest() {
   free(x_ind);
   free(y_ind);
   free(arrL);
+  spKDArrayDestroy(kdLeft);
 
   // Test rightArr
   SPPoint* arrR = (SPPoint*)malloc(2*sizeof(SPPoint));
@@ -143,6 +149,7 @@ int SPKDArraySplitTest() {
   free(x_ind);
   free(y_ind);
   free(arrR);
+  spKDArrayDestroy(kdRight);
 
   for (int i=0;i<SIZE;i++) spPointDestroy(arr[i]);
   free(arr);
@@ -150,7 +157,7 @@ int SPKDArraySplitTest() {
   return true;
 }
 
-int main(int argc, char const *argv[]) {
+int main() {
   RUN_TEST(SPKDArrayInitTest);
   RUN_TEST(SPKDArraySplitTest);
 

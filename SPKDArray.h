@@ -55,7 +55,7 @@ SPKDArray Init(SPPoint* arr, int size);
 /*
  *  Destroy the SPKDArray given and clear it's memory usage.
  */
- int spKDArrayDestroy(SPKDArray spkdArr);
+ void spKDArrayDestroy(SPKDArray spkdArr);
 
 /*
  *  Prints the SPKDAraay given
