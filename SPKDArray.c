@@ -23,13 +23,13 @@ int compareCoorValues(const void* a, const void* b) {
 
 SPKDArray Init(SPPoint* arr, int size) {
   if (size <= 0) return NULL; // incorrect size param
-  
+
   int i, j;
 
   // dim and size
   spkdArr->dim = spPointGetDimension(arr[0]);
   spkdArr->size = size;
-  
+
   // memory allocation
   SPKDArray spkdArr = (SPKDArray)malloc(sizeof(struct sp_kd_array));
   spkdArr->points = (SPPoint*)calloc(spkdArr->size,sizeof(SPPoint));
@@ -41,9 +41,9 @@ SPKDArray Init(SPPoint* arr, int size) {
   // if any allocation failed free all and return NULL
   if (!spkdArr || !spkdArr->points || !spkdArr->kdArray || !kdArrayV || !rowTmp || !rowTmpV) {
     free(spkdArr->points);
+    free(kdArrayV);
     free(spkdArr->kdArray);
     free(spkdArr);
-    free(kdArrayV);
     free(rowTmp);
     free(rowTmpV);
     return NULL;
@@ -58,9 +58,9 @@ SPKDArray Init(SPPoint* arr, int size) {
         spPointDestroy(spkdArr->points[j]);
       }
       free(spkdArr->points);
+      free(kdArrayV);
       free(spkdArr->kdArray);
       free(spkdArr);
-      free(kdArrayV);
       free(rowTmp);
       free(rowTmpV);
       return NULL;
