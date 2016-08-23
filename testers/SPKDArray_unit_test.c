@@ -11,11 +11,12 @@
 #include "../SPPoint.h"
 
 const int DIM = 2;
+const int SIZE = 5;
 
 // TODO: Handle edge cases on all test functions.
 
 SPPoint* GeneratePointArray() {
-  SPPoint* arr = (SPPoint*)malloc(sizeof(SPPoint)*5);
+  SPPoint* arr = (SPPoint*)malloc(sizeof(SPPoint)*SIZE);
   double* data = (double*)malloc(DIM*sizeof(double));
   data[0] = 1;
   data[1] = 2;
@@ -36,65 +37,66 @@ SPPoint* GeneratePointArray() {
   return arr;
 }
 
-int SPKDArrayGetPointsArrayTest(SPKDArray kdArr, SPPoint* arr, int mx) {
+int SPKDArrayGetPointsArrayTest(SPKDArray kdArr, SPPoint* arr, int size) {
     SPPoint* arr_cpy = GetPointsArray(kdArr);
-    for (int i=0;i<mx;i++) {
-      ASSERT_TRUE(spPointL2SquaredDistance(arr[i],arr_cpy[i]));
+    for (int i=0;i<size;i++) {
+      ASSERT_TRUE(spPointL2SquaredDistance(arr[i],arr_cpy[i]) == 0);
     }
     ASSERT_FALSE(GetPointsArray(NULL));
-    return 0;
+    return true;
 }
 
-int SPKDArrayGetIndexInKDArrayTest(SPKDArray kdArr, int* x_ind, int* y_ind) {
-  for (int i=0;i<5;i++) {
+int SPKDArrayGetIndexInKDArrayTest(SPKDArray kdArr, int* x_ind, int* y_ind, int size) {
+  for (int i=0;i<size;i++) {
     ASSERT_TRUE(GetIndexInKDArray(kdArr, 0,i) == x_ind[i]);
     ASSERT_TRUE(GetIndexInKDArray(kdArr, 1,i) == y_ind[i]);
   }
-  return 0;
+  return true;
 }
 
 int SPKDArrayGetDimentionTest(SPKDArray kdArr, int dim) {
   ASSERT_TRUE(GetDimention(kdArr) == dim);
-  return 0;
+  return true;
 }
 
 int SPDKArrayGetNumberOfPointsTest(SPKDArray kdArr, int num) {
   ASSERT_TRUE(GetNumberOfPoints(kdArr) == num);
-  return 0;
+  return true;
 }
 
 int SPKDArrayInitTest() {
   SPKDArray kdArr;
   SPPoint* arr = GeneratePointArray();
-  kdArr = Init(arr, 5);
+  kdArr = Init(arr, SIZE);
+  // spKDArrayPrint2D(kdArr);
   ASSERT_TRUE(kdArr != NULL);
-  ASSERT_TRUE(SPKDArrayGetPointsArrayTest(kdArr, arr,5) == 0);
-  int* x_ind = (int*)malloc(size*sizeof(int));
+  ASSERT_TRUE(SPKDArrayGetPointsArrayTest(kdArr, arr,SIZE));
+  int* x_ind = (int*)malloc(SIZE*sizeof(int));
   x_ind[0] = 0;
   x_ind[1] = 2;
   x_ind[2] = 4;
   x_ind[3] = 3;
   x_ind[4] = 1;
-  int* y_ind = (int*)malloc(size*sizeof(int));
+  int* y_ind = (int*)malloc(SIZE*sizeof(int));
   y_ind[0] = 0;
   y_ind[1] = 4;
   y_ind[2] = 2;
   y_ind[3] = 3;
   y_ind[4] = 1;
-  ASSERT_TRUE(SPKDArrayGetIndexInKDArrayTest(kdArr,x_ind,y_ind) == 0);
-  ASSERT_TRUE(SPKDArrayGetDimentionTest(kdArr, 2) == 0);
-  ASSERT_TRUE(SPDKArrayGetNumberOfPointsTest(kdArr,5) == 0);
+  ASSERT_TRUE(SPKDArrayGetIndexInKDArrayTest(kdArr,x_ind,y_ind, 5));
+  ASSERT_TRUE(SPKDArrayGetDimentionTest(kdArr, DIM));
+  ASSERT_TRUE(SPDKArrayGetNumberOfPointsTest(kdArr,SIZE));
 
-  for (int i=0;i<5;i++) spPointDestroy(arr[i]);
+  for (int i=0;i<SIZE;i++) spPointDestroy(arr[i]);
   free(arr);
   spKDArrayDestroy(kdArr);
-  return 0;
+  return true;
 }
 
 int SPKDArraySplitTest() {
   SPKDArray kdArr;
   SPPoint* arr = GeneratePointArray();
-  kdArr = Init(arr, 5);
+  kdArr = Init(arr, SIZE);
 
   SPKDArray* kdarr_split = Split(kdArr, 0);
   ASSERT_TRUE(kdarr_split != NULL);
@@ -103,13 +105,13 @@ int SPKDArraySplitTest() {
   ASSERT_TRUE(kdLeft != NULL);
   ASSERT_TRUE(kdRight != NULL);
 
-  int* x_ind, y_ind;
+  int* x_ind, *y_ind;
   // Test leftArr
   SPPoint* arrL = (SPPoint*)malloc(3*sizeof(SPPoint));
   arrL[0] = arr[0];
   arrL[1] = arr[2];
   arrL[2] = arr[4];
-  ASSERT_TRUE(SPKDArrayGetPointsArrayTest(kdLeft, arrL,3) == 0);
+  ASSERT_TRUE(SPKDArrayGetPointsArrayTest(kdLeft, arrL,3));
   x_ind = (int*)malloc(3*sizeof(int));
   x_ind[0] = 0;
   x_ind[1] = 1;
@@ -118,9 +120,9 @@ int SPKDArraySplitTest() {
   y_ind[0] = 0;
   y_ind[1] = 2;
   y_ind[2] = 1;
-  ASSERT_TRUE(SPKDArrayGetIndexInKDArrayTest(kdLeft,x_ind,y_ind) == 0);
-  ASSERT_TRUE(SPKDArrayGetDimentionTest(kdLeft, 2) == 0);
-  ASSERT_TRUE(SPDKArrayGetNumberOfPointsTest(kdLeft,3) == 0);
+  ASSERT_TRUE(SPKDArrayGetIndexInKDArrayTest(kdLeft,x_ind,y_ind, 3));
+  ASSERT_TRUE(SPKDArrayGetDimentionTest(kdLeft, DIM));
+  ASSERT_TRUE(SPDKArrayGetNumberOfPointsTest(kdLeft,3));
   free(x_ind);
   free(y_ind);
   free(arrL);
@@ -129,24 +131,24 @@ int SPKDArraySplitTest() {
   SPPoint* arrR = (SPPoint*)malloc(2*sizeof(SPPoint));
   arrR[0] = arr[1];
   arrR[1] = arr[3];
-  ASSERT_TRUE(SPKDArrayGetPointsArrayTest(kdRight, arrR,2) == 0);
+  ASSERT_TRUE(SPKDArrayGetPointsArrayTest(kdRight, arrR,2));
   x_ind = (int*)malloc(sizeof(int)*2);
   x_ind[0] = 1;
   x_ind[1] = 0;
   y_ind = (int*)malloc(sizeof(int)*2);
   y_ind[0] = 1;
   y_ind[1] = 0;
-  ASSERT_TRUE(SPKDArrayGetIndexInKDArrayTest(kdRight,x_ind,y_ind) == 0);
-  ASSERT_TRUE(SPKDArrayGetDimentionTest(kdRight, 2) == 0);
-  ASSERT_TRUE(SPDKArrayGetNumberOfPointsTest(kdRight,2) == 0);
+  ASSERT_TRUE(SPKDArrayGetIndexInKDArrayTest(kdRight,x_ind,y_ind, 2));
+  ASSERT_TRUE(SPKDArrayGetDimentionTest(kdRight, DIM));
+  ASSERT_TRUE(SPDKArrayGetNumberOfPointsTest(kdRight,2));
   free(x_ind);
   free(y_ind);
   free(arrR);
 
-  for (int i=0;i<5;i++) spPointDestroy(arr[i]);
+  for (int i=0;i<SIZE;i++) spPointDestroy(arr[i]);
   free(arr);
   spKDArrayDestroy(kdArr);
-  return 0;
+  return true;
 }
 
 int main(int argc, char const *argv[]) {

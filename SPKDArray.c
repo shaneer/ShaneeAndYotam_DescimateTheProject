@@ -136,21 +136,19 @@ void spKDArrayPrint2D(SPKDArray spkdArr) {
   char* m2 = "- Points:\n";
   char* m3 = "- Size:\t";
   char* m4 = "- Dim:\t";
-  char* m5 = "- Matrix:\n";
+  char* m5 = "- Matrix:";
 
-  printf("%s%s\t\t", m1,m2);
-  for (int i=0; i<spkdArr->size; i++) {
-    printf("%d\t", i);
-  }
-  printf("\n\t\t");
-  for (int i=0; i<spkdArr->size; i++) {
-    printf("(%.0f, %.0f)\t", spPointGetAxisCoor((spkdArr->points)[i],0), spPointGetAxisCoor((spkdArr->points)[i],1));
-  }
+  printf("%s", m1);
   printf("%s%d\n", m3, spkdArr->size);
   printf("%s%d\n", m4, spkdArr->dim);
+  printf("%s", m2);
+  for (int i=0; i<spkdArr->size; i++) {
+    printf("\t%d\t-\t(%.0f, %.0f)\n", i, spPointGetAxisCoor((spkdArr->points)[i],0),
+        spPointGetAxisCoor((spkdArr->points)[i],1));
+  }
   printf("%s", m5);
   for (int i=0;i<spkdArr->dim;i++) {
-    printf("\n\t\t");
+    printf("\n\t");
     for (int j=0;j<spkdArr->size; j++) {
       printf("%d\t", (spkdArr->kdArray)[i][j]);
     }
