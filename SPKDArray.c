@@ -216,6 +216,8 @@ SPKDArray* Split(SPKDArray kdArr, int coor) {
   }
   resArray[0] = leftArr;
   resArray[1] = rightArr;
+
+  // return
   return resArray;
 }
 
