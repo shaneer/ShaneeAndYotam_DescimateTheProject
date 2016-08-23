@@ -7,7 +7,7 @@
 #ifndef SPKDARRAY_H_
 #define SPKDARRAY_H_
 
-typedef struct kd_array* SPKDArray;
+typedef struct sp_kd_array* SPKDArray;
 
 /*
  *  Allocates the needed memory, copies the points
@@ -55,6 +55,6 @@ SPKDArray Init(SPPoint* arr, int size);
 /*
  *  Destroy the SPKDArray given and clear it's memory usage.
  */
- int SPKDArrayDestroy(SPKDArray kdArr);
+ int spKDArrayDestroy(SPKDArray kdArr);
 
 #endif // SPKDRAAY_H_
