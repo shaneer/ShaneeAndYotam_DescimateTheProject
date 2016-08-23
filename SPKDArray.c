@@ -23,14 +23,20 @@ int compareCoorValues(const void* a, const void* b) {
 
 SPKDArray Init(SPPoint* arr, int size) {
   if (size <= 0) return NULL; // incorrect size param
-
+  
   int i, j;
+
+  // dim and size
+  spkdArr->dim = spPointGetDimension(arr[0]);
+  spkdArr->size = size;
+  
+  // memory allocation
   SPKDArray spkdArr = (SPKDArray)malloc(sizeof(struct sp_kd_array));
-  spkdArr->points = (SPPoint*)malloc(sizeof(arr));
-  spkdArr->kdArray = (int**)malloc((spkdArr->dim)*sizeof(int*));
-  int* kdArrayV = (int*)malloc((spkdArr->dim)*size*sizeof(int));
-  double** rowTmp = (double**)malloc(size*sizeof(double*)); // freed
-  double* rowTmpV = (double*)malloc(size*2*sizeof(double)); // freed
+  spkdArr->points = (SPPoint*)calloc(spkdArr->size,sizeof(SPPoint));
+  spkdArr->kdArray = (int**)calloc(spkdArr->dim,sizeof(int*));
+  int* kdArrayV = (int*)calloc((spkdArr->dim)*spkdArr->size, sizeof(int));
+  double** rowTmp = (double**)calloc(spkdArr->size, sizeof(double*)); // freed
+  double* rowTmpV = (double*)calloc(spkdArr->size*2, sizeof(double)); // freed
 
   // if any allocation failed free all and return NULL
   if (!spkdArr || !spkdArr->points || !spkdArr->kdArray || !kdArrayV || !rowTmp || !rowTmpV) {
@@ -60,9 +66,6 @@ SPKDArray Init(SPPoint* arr, int size) {
       return NULL;
     }
   }
-  // dim and size
-  spkdArr->dim = spPointGetDimension(arr[0]);
-  spkdArr->size = size;
 
   // fix temp row pointer placement
   for (j=0;j<size;j++) {
