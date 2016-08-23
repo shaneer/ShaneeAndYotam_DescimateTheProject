@@ -95,10 +95,10 @@ SPKDArray Init(SPPoint* arr, int size) {
   return spkdArr;
 }
 
-SPPoint* GetPointsArray(SPKDArray kdArr) {
-  SPPoint* cpy = (SPPoint*)malloc(sizeof(kdArr->points));
-  for (int i=0; i<kdArr->size; i++) {
-    cpy[i] = spPointCopy(kdArr->points[i]);
+SPPoint* GetPointsArray(SPKDArray spkdArr) {
+  SPPoint* cpy = (SPPoint*)malloc(sizeof(spkdArr->points));
+  for (int i=0; i<spkdArr->size; i++) {
+    cpy[i] = spPointCopy(spkdArr->points[i]);
   }
   return cpy;
 }
@@ -118,7 +118,7 @@ int GetNumberOfPoints(SPKDArray kdArr) {
 int spKDArrayDestroy(SPKDArray spkdArr){
   for (int i=0;i<spkdArr->size;i++) spPointDestroy(spkdArr->points[i]);
   free(spkdArr->points);
-  free(*spkdArr->kdArray);
+  free(*(spkdArr->kdArray));
   free(spkdArr->kdArray);
   free(spkdArr);
   return 0;
