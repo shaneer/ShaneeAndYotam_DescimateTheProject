@@ -30,31 +30,36 @@ SPKDArray Init(SPPoint* arr, int size);
  *  @return
  *  NULL if error occured , otherwise returns two SPKDArray (kdLeft, kdRight).
  */
- SPKDArray* Split(SPKDArray kdArr, int coor);
+ SPKDArray* Split(SPKDArray spkdArr, int coor);
 
 /*
  *  Return a copy of the point array
  */
- SPPoint* GetPointsArray(SPKDArray kdArr);
+ SPPoint* GetPointsArray(SPKDArray spkdArr);
 
 /*
  *  Getter for the image-index at kdArr[i,j].
  */
- int GetIndexInKDArray(SPKDArray kdArr, int i, int j);
+ int GetIndexInKDArray(SPKDArray spkdArr, int i, int j);
 
 /*
  *  Getter for the dimention of the SPKDArray.
  */
- int GetDimention(SPKDArray kdArr);
+ int GetDimention(SPKDArray spkdArr);
 
 /*
  *  Getter for the amount of points in the SPKDArray.
  */
- int GetNumberOfPoints(SPKDArray kdArr);
+ int GetNumberOfPoints(SPKDArray spkdArr);
 
 /*
  *  Destroy the SPKDArray given and clear it's memory usage.
  */
- int spKDArrayDestroy(SPKDArray kdArr);
+ int spKDArrayDestroy(SPKDArray spkdArr);
+
+/*
+ *  Prints the SPKDAraay given
+ */
+ void spKDArrayPrint2D(SPKDArray spkdArr);
 
 #endif // SPKDRAAY_H_
