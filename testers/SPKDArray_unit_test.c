@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "unit_test_util.h"
 #include "../SPKDArray.h"
 #include "../SPPoint.h"
@@ -68,8 +69,18 @@ int SPKDArrayInitTest() {
   kdArr = Init(arr, 5);
   ASSERT_TRUE(kdArr != NULL);
   ASSERT_TRUE(SPKDArrayGetPointsArrayTest(kdArr, arr,5) == 0);
-  int* x_ind = {0,2,4,3,1};
-  int* y_ind = {0,4,2,3,1};
+  int* x_ind = (int*)malloc(size*sizeof(int));
+  x_ind[0] = 0;
+  x_ind[1] = 2;
+  x_ind[2] = 4;
+  x_ind[3] = 3;
+  x_ind[4] = 1;
+  int* y_ind = (int*)malloc(size*sizeof(int));
+  y_ind[0] = 0;
+  y_ind[1] = 4;
+  y_ind[2] = 2;
+  y_ind[3] = 3;
+  y_ind[4] = 1;
   ASSERT_TRUE(SPKDArrayGetIndexInKDArrayTest(kdArr,x_ind,y_ind) == 0);
   ASSERT_TRUE(SPKDArrayGetDimentionTest(kdArr, 2) == 0);
   ASSERT_TRUE(SPDKArrayGetNumberOfPointsTest(kdArr,5) == 0);
@@ -99,11 +110,19 @@ int SPKDArraySplitTest() {
   arrL[1] = arr[2];
   arrL[2] = arr[4];
   ASSERT_TRUE(SPKDArrayGetPointsArrayTest(kdLeft, arrL,3) == 0);
-  x_ind = {0,1,2};
-  y_ind = {0,2,1};
+  x_ind = (int*)malloc(3*sizeof(int));
+  x_ind[0] = 0;
+  x_ind[1] = 1;
+  x_ind[2] = 2;
+  y_ind = (int*)malloc(3*sizeof(int));
+  y_ind[0] = 0;
+  y_ind[1] = 2;
+  y_ind[2] = 1;
   ASSERT_TRUE(SPKDArrayGetIndexInKDArrayTest(kdLeft,x_ind,y_ind) == 0);
   ASSERT_TRUE(SPKDArrayGetDimentionTest(kdLeft, 2) == 0);
   ASSERT_TRUE(SPDKArrayGetNumberOfPointsTest(kdLeft,3) == 0);
+  free(x_ind);
+  free(y_ind);
   free(arrL);
 
   // Test rightArr
@@ -111,11 +130,17 @@ int SPKDArraySplitTest() {
   arrR[0] = arr[1];
   arrR[1] = arr[3];
   ASSERT_TRUE(SPKDArrayGetPointsArrayTest(kdRight, arrR,2) == 0);
-  x_ind = {1,0};
-  y_ind = {1,0};
+  x_ind = (int*)malloc(sizeof(int)*2);
+  x_ind[0] = 1;
+  x_ind[1] = 0;
+  y_ind = (int*)malloc(sizeof(int)*2);
+  y_ind[0] = 1;
+  y_ind[1] = 0;
   ASSERT_TRUE(SPKDArrayGetIndexInKDArrayTest(kdRight,x_ind,y_ind) == 0);
   ASSERT_TRUE(SPKDArrayGetDimentionTest(kdRight, 2) == 0);
   ASSERT_TRUE(SPDKArrayGetNumberOfPointsTest(kdRight,2) == 0);
+  free(x_ind);
+  free(y_ind);
   free(arrR);
 
   for (int i=0;i<5;i++) spPointDestroy(arr[i]);

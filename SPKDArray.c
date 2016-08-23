@@ -16,8 +16,8 @@ struct sp_kd_array {
 };
 
 int compareCoorValues(const void* a, const void* b) {
-    double* pa = (double*)pa;
-    double* pb = (double*)pb;
+    const double* pa = *(const double**)a;
+    const double* pb = *(const double**)b;
     return (int)(pa[1]-pb[1]);
 }
 
@@ -85,7 +85,7 @@ SPKDArray Init(SPPoint* arr, int size) {
   }
 
   // free the temporary row
-  free(rowTmpV)
+  free(rowTmpV);
   free(rowTmp);
   return spkdArr;
 }
@@ -110,11 +110,15 @@ int GetNumberOfPoints(SPKDArray kdArr) {
   return kdArr->size;
 }
 
-int spKDArrayDestroy(SPKDArray kdArr){
-  for (int i=0;i<kdArr->size;i++) spPointDestroy(kdArr->points[i]);
+int spKDArrayDestroy(SPKDArray spkdArr){
+  for (int i=0;i<spkdArr->size;i++) spPointDestroy(spkdArr->points[i]);
   free(spkdArr->points);
   free(*spkdArr->kdArray);
   free(spkdArr->kdArray);
   free(spkdArr);
   return 0;
+}
+
+SPKDArray* Split(SPKDArray kdArr, int coor) {
+  return NULL;
 }
