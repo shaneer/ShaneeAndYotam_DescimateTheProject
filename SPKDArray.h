@@ -3,10 +3,10 @@
     Author: Yotam
 */
 
-#ifndef KDARRAY_H_
-#define KDARRAY_H_
+#ifndef SPKDARRAY_H_
+#define SPKDARRAY_H_
 
-typedef struct kd_array* KDArray;
+typedef struct kd_array* SPKDArray;
 
 /*
  *  Allocates the needed memory, copies the points
@@ -29,5 +29,6 @@ KDArray Init(SPPoint* arr, int size);
  *  @return
  *  NULL if error occured , otherwise returns two SPKDArray (kdLeft, kdRight).
  */
+ SPKDArray* Split(SPKDArray kdArr, int coor);
 
-#endif // KDRAAY_H
+#endif // SPKDRAAY_H
