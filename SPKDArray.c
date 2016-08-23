@@ -116,14 +116,17 @@ SPPoint* GetPointsArray(SPKDArray spkdArr) {
 }
 
 int GetIndexInKDArray(SPKDArray kdArr, int i, int j) {
+  assert(kdArr != NULL && i >= 0 && j >= 0);
   return kdArr->kdArray[i][j];
 }
 
 int GetDimention(SPKDArray kdArr) {
+  assert(kdArr != NULL);
   return kdArr->dim;
 }
 
 int GetNumberOfPoints(SPKDArray kdArr) {
+  assert(kdArr != NULL);
   return kdArr->size;
 }
 
@@ -167,11 +170,11 @@ SPKDArray* Split(SPKDArray kdArr, int coor) {
   rightArr->kdArray = (int**)calloc(rightArr->dim,sizeof(int*)); // right
   int* kdArrayVR = (int*)calloc((rightArr->size)*(rightArr->dim), sizeof(int)); // right
   // general allocation
-  int* xArr = (int*)calloc(kdArr->size, sizeof(int));
-  int* mapL = (int*)calloc(kdArr->size, sizeof(int));
-  int* mapR = (int*)calloc(kdArr->size, sizeof(int));
+  int* xArr = (int*)calloc(kdArr->size, sizeof(int)); // freed
+  int* mapL = (int*)calloc(kdArr->size, sizeof(int)); // freed
+  int* mapR = (int*)calloc(kdArr->size, sizeof(int)); // freed
   // copy the points from the kdArr
-  SPPoint* pointTmp = GetPointsArray(kdArr);
+  SPPoint* pointTmp = GetPointsArray(kdArr); // freed
 
   // check that no allocation errors occured
   if (!leftArr->points || !leftArr->kdArray || !kdArrayVL || !rightArr->points || !rightArr->kdArray || !kdArrayVR || !xArr || !mapL || !mapR || !pointTmp) {
@@ -249,6 +252,10 @@ SPKDArray* Split(SPKDArray kdArr, int coor) {
   resArray[0] = leftArr;
   resArray[1] = rightArr;
 
+  free(xArr);
+  free(mapL);
+  free(mapR);
+  free(pointTmp);
   // return
   return resArray;
 }
