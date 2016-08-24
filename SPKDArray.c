@@ -144,6 +144,7 @@ SPKDArray Init(SPPoint* arr, int size) {
 // helper for Split
 void updateXArrayforSPKDArray(SPKDArray kdArr, int* xArr, int midP, int coor) {
   // update X-Array
+  int i;
   for (i=0;i<kdArr->size;i++) {
     if (i <= midP) {
       xArr[(kdArr->kdArray)[coor][i]] = 0;
@@ -214,7 +215,6 @@ SPKDArray* Split(SPKDArray kdArr, int coor) {
   // check correct input
   if(!kdArr || coor < 0) return NULL;
 
-  int i, j, k, l;
   int midP = (int)((kdArr->size)/2.0);
   // memory allocation
   // ---------------------
@@ -244,7 +244,7 @@ SPKDArray* Split(SPKDArray kdArr, int coor) {
   int* mapL = (int*)calloc(kdArr->size, sizeof(int)); // freed
   int* mapR = (int*)calloc(kdArr->size, sizeof(int)); // freed
   // copy the points from the kdArr
-  SPPoint* pointTmp = GetPointsArray(kdArr); // freed
+  SPPoint* pointTmp = spKDArrayGetPointsArray(kdArr); // freed
 
   // check that no allocation errors occured
   if (!leftArr->points || !leftArr->kdArray || !kdArrayVL || !rightArr->points || !rightArr->kdArray || !kdArrayVR || !xArr || !mapL || !mapR || !pointTmp) {
@@ -268,6 +268,8 @@ SPKDArray* Split(SPKDArray kdArr, int coor) {
   updateXArrayforSPKDArray(kdArr, xArr, midP, coor);
 
   updateMapsAndAddPointsToLists(kdArr, leftArr, rightArr, pointTmp, xArr, mapL, mapR);
+
+  fixPointerPlacementForKDArrayMatrix(leftArr, rightArr, kdArrayVL, kdArrayVR);
 
   recreateSortedKDArrayMatrixes(kdArr, leftArr, rightArr, xArr, mapL, mapR);
 
@@ -307,12 +309,12 @@ void spKDArrayFullPrint(SPKDArray spkdArr) {
   printf("%s%d\n", m4, spkdArr->dim);
   printf("%s", m2);
   for (int i=0; i<spkdArr->size; i++) {
-    printf("\t%d\t-\t(");
+    printf("\t%d\t-\t(", i);
     for (int j=0;j<spkdArr->dim;j++) {
-      printf("%.0f", i, spPointGetAxisCoor((spkdArr->points)[i],j));
-      if (j < spkdArr->dim - 1) printf(", \n", );
+      printf("%.0f", spPointGetAxisCoor((spkdArr->points)[i],j));
+      if (j < spkdArr->dim - 1) printf(", ");
     }
-    printf(")\n", );
+    printf(")\n");
   }
   printf("%s", m5);
   for (int i=0;i<spkdArr->dim;i++) {
