@@ -35,22 +35,22 @@ SPKDArray Init(SPPoint* arr, int size);
 /*
  *  Return a copy of the point array
  */
- SPPoint* GetPointsArray(SPKDArray spkdArr);
+ SPPoint* spKDArrayGetPointsArray(SPKDArray spkdArr);
 
 /*
  *  Getter for the image-index at kdArr[i,j].
  */
- int GetIndexInKDArray(SPKDArray spkdArr, int i, int j);
+ int spKDArrayGetIndexInArray(SPKDArray spkdArr, int i, int j);
 
 /*
  *  Getter for the dimention of the SPKDArray.
  */
- int GetDimention(SPKDArray spkdArr);
+ int spKDArrayGetDimention(SPKDArray spkdArr);
 
 /*
  *  Getter for the amount of points in the SPKDArray.
  */
- int GetNumberOfPoints(SPKDArray spkdArr);
+ int spKDArrayGetNumberOfPoints(SPKDArray spkdArr);
 
 /*
  *  Destroy the SPKDArray given and clear it's memory usage.
@@ -60,6 +60,6 @@ SPKDArray Init(SPPoint* arr, int size);
 /*
  *  Prints the SPKDAraay given
  */
- void spKDArrayPrint2D(SPKDArray spkdArr);
+ void spKDArrayFullPrint(SPKDArray spkdArr);
 
 #endif // SPKDRAAY_H_

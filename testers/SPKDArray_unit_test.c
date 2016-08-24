@@ -38,31 +38,31 @@ SPPoint* GeneratePointArray() {
 }
 
 int SPKDArrayGetPointsArrayTest(SPKDArray kdArr, SPPoint* arr, int size) {
-    SPPoint* arr_cpy = GetPointsArray(kdArr);
+    SPPoint* arr_cpy = spKDArrayGetPointsArray(kdArr);
     for (int i=0;i<size;i++) {
       ASSERT_TRUE(spPointL2SquaredDistance(arr[i],arr_cpy[i]) == 0);
       spPointDestroy(arr_cpy[i]);
     }
-    ASSERT_FALSE(GetPointsArray(NULL));
+    ASSERT_FALSE(spKDArrayGetPointsArray(NULL));
     free(arr_cpy);
     return true;
 }
 
 int SPKDArrayGetIndexInKDArrayTest(SPKDArray kdArr, int* x_ind, int* y_ind, int size) {
   for (int i=0;i<size;i++) {
-    ASSERT_TRUE(GetIndexInKDArray(kdArr, 0,i) == x_ind[i]);
-    ASSERT_TRUE(GetIndexInKDArray(kdArr, 1,i) == y_ind[i]);
+    ASSERT_TRUE(spKDArrayGetIndexInArray(kdArr, 0,i) == x_ind[i]);
+    ASSERT_TRUE(spKDArrayGetIndexInArray(kdArr, 1,i) == y_ind[i]);
   }
   return true;
 }
 
 int SPKDArrayGetDimentionTest(SPKDArray kdArr, int dim) {
-  ASSERT_TRUE(GetDimention(kdArr) == dim);
+  ASSERT_TRUE(spKDArrayGetDimention(kdArr) == dim);
   return true;
 }
 
 int SPDKArrayGetNumberOfPointsTest(SPKDArray kdArr, int num) {
-  ASSERT_TRUE(GetNumberOfPoints(kdArr) == num);
+  ASSERT_TRUE(spKDArrayGetNumberOfPoints(kdArr) == num);
   return true;
 }
 
