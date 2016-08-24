@@ -60,6 +60,6 @@ SPKDArray Init(SPPoint* arr, int size);
 /*
  *  Prints the SPKDAraay given
  */
- void spKDArrayPrint2D(SPKDArray spkdArr);
+ void spKDArrayFullPrint(SPKDArray spkdArr);
 
 #endif // SPKDRAAY_H_
