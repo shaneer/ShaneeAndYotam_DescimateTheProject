@@ -15,7 +15,10 @@
 - [ ] Load / Save
 
 ## Yotam
-- [ ] KDArray
+- [x] KDArray
+- [x] Test KDArray on Nova
+- [ ] Think about dividing big functions to smaller functions
+- [ ] Try and find more edge cases
 
 ## Notes
 1. Make sure that the logger was set at the beginning of the main function.
