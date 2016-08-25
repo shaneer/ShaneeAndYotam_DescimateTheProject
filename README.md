@@ -17,7 +17,7 @@
 ## Yotam
 - [x] KDArray
 - [x] Test KDArray on Nova
-- [ ] Think about dividing big functions to smaller functions
+- [x] Divide big functions into smaller functions
 - [ ] Try and find more edge cases
 
 ## Notes
