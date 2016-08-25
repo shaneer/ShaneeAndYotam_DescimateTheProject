@@ -12,6 +12,7 @@ typedef struct sp_kd_array* SPKDArray;
 /*
  *  Allocates the needed memory, copies the points
  *  and creates the KDArray from them, with the given size.
+ *  The method assumes the size param (size) is valid for the points array (arr).
  *
  *  arr - the SPPoint array
  *  size - the amount of points in the array
@@ -23,6 +24,7 @@ SPKDArray Init(SPPoint* arr, int size);
 
 /*
  *  Splits the given SPKDArray based on a given coordinate.
+ *  This function assumes that the coordinate param (coor) is valid for the given SPKDArray.
  *
  *  kdArr - the SPKDArray to split
  *  coor - the coordinate to split by
