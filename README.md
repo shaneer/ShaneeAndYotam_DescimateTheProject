@@ -5,20 +5,19 @@
 
 ## General:
 - [x] Be AWESOME
-- [ ] Build project skeleton
-- [ ] Add BPQ
 - [x] Add SPPoint from assginment 3
+- [ ] Add BPQueue from assginment 3
 - [ ] Add SPLogger from assginment 3
 
 ## Shanee
 - [ ] Config File
-- [ ] Load / Save
+- [ ] KDtree
 
 ## Yotam
 - [x] KDArray
-- [x] Test KDArray on Nova
-- [x] Divide big functions into smaller functions
-- [ ] Try and find more edge cases
+- [ ] Load / Save
+- [ ] Main Loop
+- [ ] Logger - Verify
 
 ## Notes
 1. Make sure that the logger was set at the beginning of the main function.
