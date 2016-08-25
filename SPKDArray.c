@@ -83,7 +83,7 @@ void initializeKDArrayMatrixSorted(SPKDArray spkdArr, double** rowTmp, SPPoint* 
 }
 
 SPKDArray Init(SPPoint* arr, int size) {
-  if (size <= 0) return NULL; // incorrect size param
+  if (!arr || size <= 0) return NULL; // invalid input
 
   int i, j;
   // memory allocation
@@ -136,8 +136,6 @@ SPKDArray Init(SPPoint* arr, int size) {
   // free the temporary row
   free(rowTmpV);
   free(rowTmp);
-
-  // return
   return spkdArr;
 }
 
@@ -217,7 +215,6 @@ SPKDArray* Split(SPKDArray kdArr, int coor) {
 
   int midP = (int)((kdArr->size)/2.0);
   // memory allocation
-  // ---------------------
   SPKDArray* resArray = (SPKDArray*)calloc(2,sizeof(SPKDArray));
   if (!resArray) return NULL;
   //
@@ -281,7 +278,6 @@ SPKDArray* Split(SPKDArray kdArr, int coor) {
   free(mapL);
   free(mapR);
   free(pointTmp);
-  // return
   return resArray;
 }
 
