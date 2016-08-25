@@ -5,6 +5,18 @@
 #include <stdio.h>
 #include "SPLogger.h"
 
+#define CONFIG_LINE_MAX_SIZE 1024		///TODO - maxsize?
+#define MAX_SUFFIX_LEN 5
+#define MIN_NUM_OF_IMGS 0
+#define MIN_NUM_OF_FEATURES 0
+#define MIN_DIM 10
+#define MAX_DIM 28
+#define MIN_SIMILAR_IMGS 0
+#define MIN_KNN 0
+#define MIN_LENGTH_OF_CONFIG_LINE 8		//"spKNN=1\n"
+#define MAX_INT_LEN 12
+
+
 /**
  * A data-structure which is used for configuring the system.
  */
@@ -15,26 +27,36 @@ typedef enum sp_config_msg_t {
 	SP_CONFIG_MISSING_SUFFIX,
 	SP_CONFIG_MISSING_NUM_IMAGES,
 	SP_CONFIG_CANNOT_OPEN_FILE,
+	SP_CONFIG_INVALID_FILE,				//Invalid config file given
+	SP_CONFIG_FAULTY_DEFAULT,			//No config given and default file is faulty and cannot be opened
+	SP_CONFIG_INVALID_LINE,				//Invalid line in config file: not a comment, assignment or newline
 	SP_CONFIG_ALLOC_FAIL,
 	SP_CONFIG_INVALID_INTEGER,
 	SP_CONFIG_INVALID_STRING,
+	SP_CONFIG_INVALID_VALUE,			//Invalid value given to variable - doesn't match param type
+	//TODO - Warning vs. Error
+	SP_CONFIG_REDEFINE,					//Param defined more than once : WARNING?
 	SP_CONFIG_INVALID_ARGUMENT,
 	SP_CONFIG_INDEX_OUT_OF_RANGE,
 	SP_CONFIG_SUCCESS
 } SP_CONFIG_MSG;
+
+typedef enum sp_split_method_t{
+	MAX_SPREAD, RANDOM, INCREMENTAL
+}SP_SPLIT_METHOD;
 
 typedef struct sp_config_t* SPConfig;
 
 /**
  * Creates a new system configuration struct. The configuration struct
  * is initialized based on the configuration file given by 'filename'.
- * 
+ *
  * @param filename - the name of the configuration file
  * @assert msg != NULL
  * @param msg - pointer in which the msg returned by the function is stored
  * @return NULL in case an error occurs. Otherwise, a pointer to a struct which
  * 		   contains all system configuration.
- * 
+ *
  * The resulting value stored in msg is as follow:
  * - SP_CONFIG_INVALID_ARGUMENT - if filename == NULL
  * - SP_CONFIG_CANNOT_OPEN_FILE - if the configuration file given by filename cannot be open
@@ -43,13 +65,48 @@ typedef struct sp_config_t* SPConfig;
  * - SP_CONFIG_INVALID_STRING - if a line in the config file contains invalid string
  * - SP_CONFIG_MISSING_DIR - if spImagesDirectory is missing
  * - SP_CONFIG_MISSING_PREFIX - if spImagesPrefix is missing
- * - SP_CONFIG_MISSING_SUFFIX - if spImagesSuffix is missing 
+ * - SP_CONFIG_MISSING_SUFFIX - if spImagesSuffix is missing
  * - SP_CONFIG_MISSING_NUM_IMAGES - if spNumOfImages is missing
  * - SP_CONFIG_SUCCESS - in case of success
  *
  *
  */
 SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg);
+
+/**
+ * TODO
+ */
+int setDefaults(SPConfig config);
+
+/**
+ * TODO
+ */
+int readInt(char* config_line, int maxLength, int minLength);
+    //char prm_name[maxLength];
+    //int val;
+    //sscanf(config_line, "%s %d\n", prm_name, &val);
+    //return val;
+
+  /**
+   * TODO
+   */
+void readStr(char* config_line, char* val);
+    //char prm_name[maxLength];
+    //sscanf(config_line, "%s %s\n", prm_name, val);
+
+/**
+ * TODO
+ */
+void readSuffix(char* config_line, char* val);
+/**
+ * TODO
+ */
+bool readBool(char* config_line);
+/**
+ * TODO
+ */
+int readEnum(char* config_line);
+
 
 /*
  * Returns true if spExtractionMode = true, false otherwise.
@@ -165,7 +222,7 @@ SP_CONFIG_MSG spConfigGetImagePath(char* imagePath, const SPConfig config,
 SP_CONFIG_MSG spConfigGetPCAPath(char* pcaPath, const SPConfig config);
 
 /**
- * Frees all memory resources associate with config. 
+ * Frees all memory resources associate with config.
  * If config == NULL nothig is done.
  */
 void spConfigDestroy(SPConfig config);
