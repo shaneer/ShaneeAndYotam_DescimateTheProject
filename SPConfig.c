@@ -4,7 +4,6 @@
 #include "SPConfig.h"
 #include "SPLogger.h"
 
-
 typedef struct sp_config_t{
 	char* spImagesDirectory;
 	char* spImagesPrefix;
@@ -22,18 +21,6 @@ typedef struct sp_config_t{
 	char* spLoggerFilename;
 };
 
-/**
- * @assert msg != NULL
- * @return NULL in case an error occurs. Otherwise, a pointer to a struct
- * The resulting value stored in msg is as follow:
- * - SP_CONFIG_INVALID_INTEGER - if a line in the config file contains invalid integer
- * - SP_CONFIG_INVALID_STRING - if a line in the config file contains invalid string
- * - SP_CONFIG_MISSING_DIR - if spImagesDirectory is missing
- * - SP_CONFIG_MISSING_PREFIX - if spImagesPrefix is missing
- * - SP_CONFIG_MISSING_SUFFIX - if spImagesSuffix is missing
- * - SP_CONFIG_MISSING_NUM_IMAGES - if spNumOfImages is missing
- * - SP_CONFIG_SUCCESS - in case of success
- */
 SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 	assert( msg != NULL );
 	FILE *fp;
@@ -41,11 +28,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 	char* temp;
 	char* value;
 	char* paramName;
-
-	//msg = (SP_CONFIG_MSG) malloc (sizeof(*msg));
-		//if (msg == NULL) { 			//TODO - in this case how do we return a message?
-		//	return NULL;
-		//}
+	int lineCount;
 
 	temp = (char*) malloc(CONFIG_LINE_MAX_SIZE);
 			if (temp == NULL) {
@@ -71,9 +54,11 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 	}
 
 	setDefaults(res);
+	lineCount = 0;
 
 	while(! feof(fp)) {
 		fgets(temp, CONFIG_LINE_MAX_SIZE, fp);
+		lineCount++;
 
 		//'Skips' over preceding whitespace
 		while ((*temp == ' ')||(*temp == '\t')||(*temp == '\v')){
@@ -103,7 +88,10 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 			return NULL;
 		}
 		//We now have temp which we will use to discover which param to use, and value which starts at =
-		value++;
+		++value;
+		while ((*value == ' ')||(*value == '\t')||(*value == '\v')){
+			++value;
+		}
 
 		paramName = (char*) realloc(paramName, strlen(temp)-strlen(value));
 			if (paramName == NULL) {
@@ -121,16 +109,84 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 			curr=temp[i+1];
 			i++;
 		}
-		int paramNumberValue = paramName;
 
-		//We have the int value of the paramName we are given
+		if (strstr(paramName, "spImagesDirectory")) {
+
+		}
+		elif (strstr(paramName, "spImagesPrefix")) {
+
+		}
+		elif (strstr(paramName, "spImagesSuffix")) {
+
+		}
+		elif (strstr(paramName, "spNumOfImages")) {
+			int num = atoi(value);
+			if (!num==NULL && !num<0){
+				config->numOfImages = num;
+			}else {
+				//TODO
+				printConstraintsNotMet(filename, lineCount);
+				terminateDuringParse(msg);
+			}
+		}
+		elif (strstr(paramName, "spPCADimension")) {
+			int num = atoi(value);
+			if (!num==NULL && 9<num && num<29){
+				config->numOfImages = num;
+			}else{
+				//TODO
+				printConstraintsNotMet(filename, lineCount);
+				terminateDuringParse(msg);
+			}
+		}
+		elif (strstr(paramName, "spPCAFilename")) {
+		}
+		elif (strstr(paramName, "spNumOfFeatures")) {
+		}
+		elif (strstr(paramName, "spExtractionMode")) {
+		}
+		elif (strstr(paramName, "spNumOfSimilarImages")) {
+		}
+		elif (strstr(paramName, "spKDTreeSplitMethod")) {
+		}
+		elif (strstr(paramName, "spKNN")) {
+		}
+		elif (strstr(paramName, "spMinimalGUI")) {
+		}
+		elif (strstr(paramName, "spLoggerLevel")) {
+		}
+		elif (strstr(paramName, "spLoggerFilename")) {
+		}
+		else {
+			destroy(res);
+			free(temp);
+			free(paramName);
+			free(value);
+			fclose(fp);
+			free(fp);
+			*msg = SP_CONFIG_INVALID_LINE;
+			return NULL;
+		}
 
 	}
 
-	*msg = SP_CONFIG_SUCCESS;
+//TODO
+	checkvalid(res);
+
+*msg = SP_CONFIG_SUCCESS;
 	return res;
 }
 
+void terminateDuringParse(SP_CONFIG_MSG* msg){
+	destroy(res);
+	free(temp);
+	free(paramName);
+	free(value);
+	fclose(fp);
+	free(fp);
+	*msg = SP_CONFIG_INVALID_LINE;
+	return NULL;
+}
 
 int setDefaults(SPConfig config){
 	//ALLOC MEM FOR DEFAULTS
@@ -200,15 +256,7 @@ bool spConfigIsExtractionMode(const SPConfig config, SP_CONFIG_MSG* msg){
 	else return false;
 }
 
-/*
- * Returns true if spMinimalGUI = true, false otherwise.
- * @param config - the configuration structure
- * @assert msg != NULL
- * @param msg - pointer in which the msg returned by the function is stored
- * @return true if spExtractionMode = true, false otherwise.
- * - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
- * - SP_CONFIG_SUCCESS - in case of success
- */
+
 bool spConfigMinimalGui(const SPConfig config, SP_CONFIG_MSG* msg){
 	assert( msg != NULL );
 	if (config == NULL){
@@ -222,16 +270,6 @@ bool spConfigMinimalGui(const SPConfig config, SP_CONFIG_MSG* msg){
 	else return false;
 }
 
-/*
- * Returns the number of images set in the configuration file, i.e the value
- * of spNumOfImages.
- * @param config - the configuration structure
- * @assert msg != NULL
- * @param msg - pointer in which the msg returned by the function is stored
- * @return positive integer in success, negative integer otherwise.
- * - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
- * - SP_CONFIG_SUCCESS - in case of success
- */
 int spConfigGetNumOfImages(const SPConfig config, SP_CONFIG_MSG* msg){
 	assert( msg != NULL );
 	if (config == NULL){

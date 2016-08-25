@@ -76,6 +76,18 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg);
 /**
  * TODO
  */
+void terminateDuringParse(SP_CONFIG_MSG* msg);
+/**
+ * TODO
+ */
+SP_CONFIG_MSG checkvalid(SPConfig config);
+/**
+ * TODO
+ */
+printConstraintsNotMet(char* filename, int lineNum);
+/**
+ * TODO
+ */
 int setDefaults(SPConfig config);
 
 /**
