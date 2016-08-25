@@ -1,7 +1,7 @@
 CC = gcc
 OBJS = SPKDArray_unit_test.o SPKDArray.o SPPoint.o
 EXEC = sp_kdarray_unit_test
-TESTS_DIR = ./testers
+TESTS_DIR = ./KDArray/testers
 COMP_FLAG = -std=c99 -Wall -Wextra \
 -Werror -pedantic-errors
 
