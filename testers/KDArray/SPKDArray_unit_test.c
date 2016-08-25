@@ -7,8 +7,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "unit_test_util.h"
-#include "../SPKDArray.h"
-#include "../SPPoint.h"
+#include "../../SPKDArray.h"
+#include "../../SPPoint.h"
 
 const int DIM = 2;
 const int SIZE = 5;
