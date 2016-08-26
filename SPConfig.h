@@ -3,6 +3,8 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <limits.h>
+#include <string.h>
 #include "SPLogger.h"
 
 #define CONFIG_LINE_MAX_SIZE 1024		///TODO - maxsize?
@@ -15,7 +17,6 @@
 #define MIN_KNN 0
 #define MIN_LENGTH_OF_CONFIG_LINE 8		//"spKNN=1\n"
 #define MAX_INT_LEN 12
-
 
 /**
  * A data-structure which is used for configuring the system.
@@ -73,6 +74,23 @@ typedef struct sp_config_t* SPConfig;
  */
 SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg);
 
+/**
+ * TODO
+ */
+void terminateDuringParse(SP_CONFIG_MSG* msg, SP_CONFIG_MSG print);
+/**
+ * TODO
+ */
+SP_CONFIG_MSG checkvalid(SP_CONFIG_MSG* msg, SPConfig res);
+
+/**
+ * PRINT FUNCTIONS since logger is not yet initiialized
+ */
+printConstraintsNotMet(char* filename, int lineNum);
+
+printInvalidLine(char* filename, int lineNum);
+
+printParamNotSet(char* filename, int lineNum, char* paramName);
 /**
  * TODO
  */
