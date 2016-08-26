@@ -99,33 +99,28 @@ int setDefaults(SPConfig config);
 /**
  * TODO
  */
-int readInt(char* config_line, int maxLength, int minLength);
-    //char prm_name[maxLength];
-    //int val;
-    //sscanf(config_line, "%s %d\n", prm_name, &val);
-    //return val;
-
+int readInt(char* val, int maxLength, int minLength);
   /**
    * TODO
    */
-void readStr(char* config_line, char* val);
-    //char prm_name[maxLength];
-    //sscanf(config_line, "%s %s\n", prm_name, val);
+char* readStr(char* val));
+
 
 /**
  * TODO
  */
-void readSuffix(char* config_line, char* val);
+char* readSuffix(char* val);
 /**
  * TODO
  */
-bool readBool(char* config_line);
+bool readBool(char* val);
 /**
  * TODO
  */
-int readEnum(char* config_line);
+enum SP_SPLIT_METHOD readEnum(char* val);
 
-
+bool isValidInt(char *str);
+bool isValidString(char *str);
 /*
  * Returns true if spExtractionMode = true, false otherwise.
  *

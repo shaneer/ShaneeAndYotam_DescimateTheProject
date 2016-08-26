@@ -75,7 +75,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 				*msg = SP_CONFIG_ALLOC_FAIL;
 				return NULL;
 			}
-		*value = strchr(temp, '=');
+		value = strchr(temp, '=');
 
 		/*INVALID LINE since not long enough to be definition and we already skipped # and \n
 		OR no '=' meaning it cannot be used as an assignment
@@ -91,6 +91,13 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 		while ((*value == ' ')||(*value == '\t')||(*value == '\v')){
 			++value;
 		}
+		//Remove spaces at end
+		//TODO make function
+		int end = strlen(value)-1;
+		while (isspace(value[end])||(value[end] == '\n')){
+			--end;
+		}
+		value[end+1]='\0';
 
 		paramName = (char*) realloc(paramName, strlen(temp)-strlen(value));
 			if (paramName == NULL) {
@@ -100,78 +107,107 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 				*msg = SP_CONFIG_ALLOC_FAIL;
 				return NULL;
 			}
-
-		char curr = temp[0];
-		int i=0;
-		while (!(curr == ' '||curr == '\n'||curr == '\t'||curr == '\v'||curr=='=')){
-			paramName[i]=curr;
-			curr=temp[i+1];
-			i++;
+		//Copy param name, until first space or until '='
+		int ind=0;
+		while (!(isspace(temp[ind])||temp[ind]=='=')){
+			paramName[ind]=temp[ind];
+			ind++;
 		}
+		paramName[ind]='\0';
+
 		//TEMPORARY VALUE FOR VALIDITY CHECKS
 		int tempVal;
 
-		if (strstr(paramName, "spImagesDirectory")) {
-
+		//Check all paramNames
+		if (strcmp(paramName, "spImagesDirectory")==0) {
+			config->spImagesDirectory = readString(value);
+			if (config->spImagesDirectory == NULL){
+				return NULL;
+			}
 		}
-		elif (strstr(paramName, "spImagesPrefix")) {
-
+		elif (strcmp(paramName, "spImagesPrefix")==0) {
+			config->spImagesPrefix = readString(value);
+			if (config->spImagesPrefix == NULL){
+				return NULL;
+			}
 		}
-		elif (strstr(paramName, "spImagesSuffix")) {
-
+		elif (strcmp(paramName, "spImagesSuffix")==0) {
+			config->spImagesSuffix = readString(value);
+			if (config->spImagesSuffix == NULL){
+				return NULL;
+			}
 		}
-		elif (strstr(paramName, "spNumOfImages")) {
+		elif (strcmp(paramName, "spNumOfImages")==0) {
 			tempVal = readInt(value, INT_MAX, 0);
 			if (tempVal == -1){
 				return NULL;
 			}else
 			config->spNumOfImages = tempVal;
 		}
-		elif (strstr(paramName, "spPCADimension")) {
+		elif (strcmp(paramName, "spPCADimension")==0) {
 			tempVal = readInt(value, 28, 10);
 			if (tempVal == -1){
 				return NULL;
 			}else
 			config->spPCADimension = tempVal;
 		}
-		elif (strstr(paramName, "spPCAFilename")) {
+		elif (strcmp(paramName, "spPCAFilename")==0) {
+			config->spPCAFilename = readString(value);
+			if (config->spPCAFilename == NULL){
+				return NULL;
+			}
 		}
-		elif (strstr(paramName, "spNumOfFeatures")) {
+		elif (strcmp(paramName, "spNumOfFeatures")==0) {
 			tempVal = readInt(value, INT_MAX, 0);
 			if (tempVal == -1){
 				return NULL;
 			}else
 			config->spNumOfFeatures = tempVal;
 		}
-		elif (strstr(paramName, "spExtractionMode")) {
-
+		elif (strcmp(paramName, "spExtractionMode")==0) {
+			config->spExtractionMode = readBool(value);
+			if (config->spExtractionMode == NULL){
+				return NULL;
+			}
 		}
-		elif (strstr(paramName, "spNumOfSimilarImages")) {
+		elif (strcmp(paramName, "spNumOfSimilarImages")==0) {
 			temp = readInt(value, INT_MAX, 1);
 			if (temp == -1){
 				return NULL;
 			}else
 			config->spNumOfSimilarImages = temp;
 		}
-		elif (strstr(paramName, "spKDTreeSplitMethod")) {
+		elif (strcmp(paramName, "spKDTreeSplitMethod")==0) {
+			config->spKDTreeSplitMethod = readEnum(value);
+			if (config->spKDTreeSplitMethod == NULL){
+				return NULL;
+			}
 		}
-		elif (strstr(paramName, "spKNN")) {
+		elif (strcmp(paramName, "spKNN")==0) {
 			temp = readInt(value, INT_MAX, 1);
 			if (temp == -1){
 				return NULL;
 			}else
 			config->spKNN = tempVal;
 		}
-		elif (strstr(paramName, "spMinimalGUI")) {
+		elif (strcmp(paramName, "spMinimalGUI")==0) {
+			config->spMinimalGUI = readBool(value);
+			if (config->spMinimalGUI == NULL){
+				return NULL;
+			}
 		}
-		elif (strstr(paramName, "spLoggerLevel")) {
+		elif (strcmp(paramName, "spLoggerLevel")==0) {
 			temp = readInt(value, 4, 1);
 			if (temp == -1){
 				return NULL;
 			}else
 			config->spLoggerLevel = tempVal;
 		}
-		elif (strstr(paramName, "spLoggerFilename")) {
+		elif (strcmp(paramName, "spLoggerFilename")==0) {
+			config->spLoggerFilename = readString(value);
+			if (config->spLoggerFilename == NULL){
+				return NULL;
+			}
 		}
 		else {
 		terminateDuringParse(msg, SP_CONFIG_INVALID_ARGUMENT);
@@ -183,7 +219,6 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 	if (check<0){
 		return NULL;
 	}
-
 	*msg = SP_CONFIG_SUCCESS;
 	fclose(fp);
 	free(fp);
@@ -191,7 +226,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 }
 
 void terminateDuringParse(SP_CONFIG_MSG* msg, SP_CONFIG_MSG print){
-	destroy(res);
+	spConfigDestroy(res);
 	free (res);
 	free(temp);
 	free(paramName);
@@ -228,6 +263,7 @@ int checkvalid(SP_CONFIG_MSG* msg, SPConfig res){
 	}
 }
 
+//PRINTING ERROR MESSAGES TO CONSOLE
 printConstraintsNotMet(char* filename, int lineNum){
 	printf(“File: %s\nLine: %d\nMessage: Invalid value - constraint not met”, filename, lineNum);
 }
@@ -264,9 +300,11 @@ int setDefaults(SPConfig config){
 	return 1;
 	}
 
-int readInt(char* config_line, int maxLength, int minLength){
-	int num = atoi(config_line);
-	if (num==NULL){
+//HELPER FUNCTIONS TO LOAD DATA FROM STRING FORN IN CONFIG LINE
+int readInt(char* value, int maxLength, int minLength){
+	if (isValidInt(value)){
+		int num = atoi(value);
+	}else{
 		printInvalidLine(filename, lineCount);
 		terminateDuringParse(msg, SP_CONFIG_INVALID_ARGUMENT);
 		return -1;
@@ -279,20 +317,101 @@ int readInt(char* config_line, int maxLength, int minLength){
 		return -1;
 	}
 }
-//TODO
-void readStr(char* config_line, char* val){
-    char param[maxLength];
-    sscanf(config_line, "%s %s\n", param, val);
-}
-//TODO
-void readSuffix(char* config_line, char* val){
-    char param[maxLength];
-    sscanf(config_line, "%s %s\n", param, val);
+
+char* readStr(char* val){
+	if (isValidString(val)){
+		return val;
+	}else{
+		printInvalidLine(filename, lineCount);
+		terminateDuringParse(msg, SP_CONFIG_INVALID_STRING);
+		return NULL;
+	}
 }
 
-bool readBool(char* config_line){}
-int readEnum(char* config_line){}
+char* readSuffix(char* val){
+	char* temp = readString(val);
+	if (temp == NULL){
+		printInvalidLine(filename, lineCount);
+		terminateDuringParse(msg, SP_CONFIG_INVALID_STRING);
+		return NULL;
+	}
+	if (!(strcmp(temp,".png") || strcmp(temp,".bmp") ||strcmp(temp,".jpg") ||strcmp(temp,".gif")){
+		printInvalidLine(filename, lineCount);
+		terminateDuringParse(msg, SP_CONFIG_INVALID_STRING);
+		return NULL;
+	}
+	return temp;
+}
 
+bool readBool(char* val){				//TODO - can the user define bool as 0/1 does case matter True/true/tRue??
+	if (val == NULL){
+		printInvalidLine(filename, lineCount);
+		terminateDuringParse(msg, SP_CONFIG_INVALID_ARGUMENT);
+		return NULL;
+	}
+	if ((strcmp(val,"true")){
+		return true;
+	}
+	elif ((strcmp(val,"true")){
+		return false;
+	}else
+	printInvalidLine(filename, lineCount);
+	terminateDuringParse(msg, SP_CONFIG_INVALID_STRING);
+	return NULL;
+}
+
+enum SP_SPLIT_METHOD readEnum(char* val){
+	if (val == NULL){
+		printInvalidLine(filename, lineCount);
+		terminateDuringParse(msg, SP_CONFIG_INVALID_ARGUMENT);
+		return NULL;
+	}
+	enum SP_SPLIT_METHOD method;
+	if ((strcmp(val,"MAX_SPREAD")){
+		method = MAX_SPREAD;
+		return method;
+	}
+	elif ((strcmp(val,"RANDOM")){
+		method = RANDOM;
+		return method;
+	}
+	elif ((strcmp(val,"INCREMENTAL")){
+		method = INCREMENTAL;
+		return method;
+	}else
+	printInvalidLine(filename, lineCount);
+	terminateDuringParse(msg, SP_CONFIG_INVALID_STRING);
+	return NULL;
+}
+
+bool isValidInt(char *str){
+   // Handle empty string or negative "-"
+   if (!*str || *str == '-'){
+      return false;
+		}
+   //Check for non-digit chars in the rest of the string
+   while (*str){
+      if (!isdigit(*str))
+         return false;
+      else
+         ++str;
+   }
+   return true;
+}
+
+bool isValidString(char *str){
+   if (!*str){
+      return false;
+		}
+   //Check for any spaces
+   while (*str){
+      if ((*str)==' ' || (*str)=='#'){
+         return false;
+			}else
+         ++str;
+   }
+   return true;
+}
 
 /*
  * Returns true if spExtractionMode = true, false otherwise.
