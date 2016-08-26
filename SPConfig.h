@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <limits.h>
 #include <string.h>
-#include "SPLogger.h"
+//#include "SPLogger.h"
 
 #define CONFIG_LINE_MAX_SIZE 1024		///TODO - maxsize?
 #define MAX_SUFFIX_LEN 5
@@ -103,7 +103,7 @@ int readInt(char* val, int maxLength, int minLength);
   /**
    * TODO
    */
-char* readStr(char* val));
+char* readStr(char* val);
 
 
 /**
