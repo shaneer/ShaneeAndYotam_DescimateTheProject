@@ -75,7 +75,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 				*msg = SP_CONFIG_ALLOC_FAIL;
 				return NULL;
 			}
-		*value = strchr(temp, '=');
+		value = strchr(temp, '=');
 
 		/*INVALID LINE since not long enough to be definition and we already skipped # and \n
 		OR no '=' meaning it cannot be used as an assignment
@@ -91,6 +91,12 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 		while ((*value == ' ')||(*value == '\t')||(*value == '\v')){
 			++value;
 		}
+		//Remove spaces at end
+		int end = strlen(value)-1;
+		while (isspace(value[end])||(value[end] == '\n')){
+			--end;
+		}
+		value[end+1]='\0';
 
 		paramName = (char*) realloc(paramName, strlen(temp)-strlen(value));
 			if (paramName == NULL) {
@@ -265,8 +271,9 @@ int setDefaults(SPConfig config){
 	}
 
 int readInt(char* config_line, int maxLength, int minLength){
-	int num = atoi(config_line);
-	if (num==NULL){
+	if (isValidInt(config_line)){
+		int num = atoi(config_line);
+	}else{
 		printInvalidLine(filename, lineCount);
 		terminateDuringParse(msg, SP_CONFIG_INVALID_ARGUMENT);
 		return -1;
@@ -293,6 +300,34 @@ void readSuffix(char* config_line, char* val){
 bool readBool(char* config_line){}
 int readEnum(char* config_line){}
 
+bool isValidInt(char *str){
+   // Handle empty string or negative "-"
+   if (!*str || *str == '-'){
+      return false;
+		}
+   //Check for non-digit chars in the rest of the string
+   while (*str){
+      if (!isdigit(*str))
+         return false;
+      else
+         ++str;
+   }
+   return true;
+}
+
+bool isValidString(char *str){
+   if (!*str){
+      return false;
+		}
+   //Check for any spaces
+   while (*str){
+      if ((*str)==' ' || (*str)=='#'){
+         return false;
+			}else
+         ++str;
+   }
+   return true;
+}
 
 /*
  * Returns true if spExtractionMode = true, false otherwise.
