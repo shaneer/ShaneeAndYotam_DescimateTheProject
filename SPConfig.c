@@ -319,6 +319,11 @@ int readInt(char* value, int maxLength, int minLength){
 }
 
 char* readStr(char* val){
+	if (val == NULL){
+		printInvalidLine(filename, lineCount);
+		terminateDuringParse(msg, SP_CONFIG_INVALID_STRING);
+		return NULL;
+	}
 	if (isValidString(val)){
 		return val;
 	}else{
@@ -329,24 +334,33 @@ char* readStr(char* val){
 }
 
 char* readSuffix(char* val){
-	char* temp = readString(val);
-	if (temp == NULL){
+	if (val == NULL){
 		printInvalidLine(filename, lineCount);
 		terminateDuringParse(msg, SP_CONFIG_INVALID_STRING);
 		return NULL;
 	}
-	if (!(strcmp(temp,".png") || strcmp(temp,".bmp") ||strcmp(temp,".jpg") ||strcmp(temp,".gif")){
+	if (!isValidString(val)){
 		printInvalidLine(filename, lineCount);
 		terminateDuringParse(msg, SP_CONFIG_INVALID_STRING);
 		return NULL;
 	}
-	return temp;
+	if (!(strcmp(val,".png") || strcmp(val,".bmp") ||strcmp(val,".jpg") ||strcmp(val,".gif")){
+		printInvalidLine(filename, lineCount);
+		terminateDuringParse(msg, SP_CONFIG_INVALID_STRING);
+		return NULL;
+	}
+	return val;
 }
 
 bool readBool(char* val){				//TODO - can the user define bool as 0/1 does case matter True/true/tRue??
 	if (val == NULL){
 		printInvalidLine(filename, lineCount);
 		terminateDuringParse(msg, SP_CONFIG_INVALID_ARGUMENT);
+		return NULL;
+	}
+	if (!isValidString(val)){
+		printInvalidLine(filename, lineCount);
+		terminateDuringParse(msg, SP_CONFIG_INVALID_STRING);
 		return NULL;
 	}
 	if ((strcmp(val,"true")){
@@ -364,6 +378,11 @@ enum SP_SPLIT_METHOD readEnum(char* val){
 	if (val == NULL){
 		printInvalidLine(filename, lineCount);
 		terminateDuringParse(msg, SP_CONFIG_INVALID_ARGUMENT);
+		return NULL;
+	}
+	if (!isValidString(val)){
+		printInvalidLine(filename, lineCount);
+		terminateDuringParse(msg, SP_CONFIG_INVALID_STRING);
 		return NULL;
 	}
 	enum SP_SPLIT_METHOD method;
