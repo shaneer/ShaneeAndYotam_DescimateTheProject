@@ -1,7 +1,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include "SPConfig.h"
-#include "SPLogger.h"
+//#include "SPLogger.h"
 
 typedef struct sp_config_t{
 	char* spImagesDirectory;
@@ -126,14 +126,14 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 			}
 		}
 		elif (strcmp(paramName, "spImagesPrefix")==0) {
-			config->spImagesPrefix = readString(value);
-			if (config->spImagesPrefix == NULL){
+			res->spImagesPrefix = readString(value);
+			if (res->spImagesPrefix == NULL){
 				return NULL;
 			}
 		}
 		elif (strcmp(paramName, "spImagesSuffix")==0) {
-			config->spImagesSuffix = readString(value);
-			if (config->spImagesSuffix == NULL){
+			res->spImagesSuffix = readString(value);
+			if (res->spImagesSuffix == NULL){
 				return NULL;
 			}
 		}
@@ -142,18 +142,18 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 			if (tempVal == -1){
 				return NULL;
 			}else
-			config->spNumOfImages = tempVal;
+			res->spNumOfImages = tempVal;
 		}
 		elif (strcmp(paramName, "spPCADimension")==0) {
 			tempVal = readInt(value, 28, 10);
 			if (tempVal == -1){
 				return NULL;
 			}else
-			config->spPCADimension = tempVal;
+			res->spPCADimension = tempVal;
 		}
 		elif (strcmp(paramName, "spPCAFilename")==0) {
-			config->spPCAFilename = readString(value);
-			if (config->spPCAFilename == NULL){
+			res->spPCAFilename = readString(value);
+			if (res->spPCAFilename == NULL){
 				return NULL;
 			}
 		}
@@ -162,11 +162,11 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 			if (tempVal == -1){
 				return NULL;
 			}else
-			config->spNumOfFeatures = tempVal;
+			res->spNumOfFeatures = tempVal;
 		}
 		elif (strcmp(paramName, "spExtractionMode")==0) {
-			config->spExtractionMode = readBool(value);
-			if (config->spExtractionMode == NULL){
+			res->spExtractionMode = readBool(value);
+			if (res->spExtractionMode == NULL){
 				return NULL;
 			}
 		}
@@ -175,11 +175,11 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 			if (temp == -1){
 				return NULL;
 			}else
-			config->spNumOfSimilarImages = temp;
+			res->spNumOfSimilarImages = temp;
 		}
 		elif (strcmp(paramName, "spKDTreeSplitMethod")==0) {
-			config->spKDTreeSplitMethod = readEnum(value);
-			if (config->spKDTreeSplitMethod == NULL){
+			res->spKDTreeSplitMethod = readEnum(value);
+			if (res->spKDTreeSplitMethod == NULL){
 				return NULL;
 			}
 		}
@@ -188,11 +188,11 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 			if (temp == -1){
 				return NULL;
 			}else
-			config->spKNN = tempVal;
+			res->spKNN = tempVal;
 		}
 		elif (strcmp(paramName, "spMinimalGUI")==0) {
-			config->spMinimalGUI = readBool(value);
-			if (config->spMinimalGUI == NULL){
+			res->spMinimalGUI = readBool(value);
+			if (res->spMinimalGUI == NULL){
 				return NULL;
 			}
 		}
@@ -201,11 +201,11 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 			if (temp == -1){
 				return NULL;
 			}else
-			config->spLoggerLevel = tempVal;
+			res->spLoggerLevel = tempVal;
 		}
 		elif (strcmp(paramName, "spLoggerFilename")==0) {
-			config->spLoggerFilename = readString(value);
-			if (config->spLoggerFilename == NULL){
+			res->spLoggerFilename = readString(value);
+			if (res->spLoggerFilename == NULL){
 				return NULL;
 			}
 		}
@@ -319,6 +319,11 @@ int readInt(char* value, int maxLength, int minLength){
 }
 
 char* readStr(char* val){
+	if (val == NULL){
+		printInvalidLine(filename, lineCount);
+		terminateDuringParse(msg, SP_CONFIG_INVALID_STRING);
+		return NULL;
+	}
 	if (isValidString(val)){
 		return val;
 	}else{
@@ -329,24 +334,33 @@ char* readStr(char* val){
 }
 
 char* readSuffix(char* val){
-	char* temp = readString(val);
-	if (temp == NULL){
+	if (val == NULL){
 		printInvalidLine(filename, lineCount);
 		terminateDuringParse(msg, SP_CONFIG_INVALID_STRING);
 		return NULL;
 	}
-	if (!(strcmp(temp,".png") || strcmp(temp,".bmp") ||strcmp(temp,".jpg") ||strcmp(temp,".gif")){
+	if (!isValidString(val)){
 		printInvalidLine(filename, lineCount);
 		terminateDuringParse(msg, SP_CONFIG_INVALID_STRING);
 		return NULL;
 	}
-	return temp;
+	if (!(strcmp(val,".png") || strcmp(val,".bmp") ||strcmp(val,".jpg") ||strcmp(val,".gif")){
+		printInvalidLine(filename, lineCount);
+		terminateDuringParse(msg, SP_CONFIG_INVALID_STRING);
+		return NULL;
+	}
+	return val;
 }
 
 bool readBool(char* val){				//TODO - can the user define bool as 0/1 does case matter True/true/tRue??
 	if (val == NULL){
 		printInvalidLine(filename, lineCount);
 		terminateDuringParse(msg, SP_CONFIG_INVALID_ARGUMENT);
+		return NULL;
+	}
+	if (!isValidString(val)){
+		printInvalidLine(filename, lineCount);
+		terminateDuringParse(msg, SP_CONFIG_INVALID_STRING);
 		return NULL;
 	}
 	if ((strcmp(val,"true")){
@@ -364,6 +378,11 @@ enum SP_SPLIT_METHOD readEnum(char* val){
 	if (val == NULL){
 		printInvalidLine(filename, lineCount);
 		terminateDuringParse(msg, SP_CONFIG_INVALID_ARGUMENT);
+		return NULL;
+	}
+	if (!isValidString(val)){
+		printInvalidLine(filename, lineCount);
+		terminateDuringParse(msg, SP_CONFIG_INVALID_STRING);
 		return NULL;
 	}
 	enum SP_SPLIT_METHOD method;
@@ -413,16 +432,6 @@ bool isValidString(char *str){
    return true;
 }
 
-/*
- * Returns true if spExtractionMode = true, false otherwise.
- * @param config - the configuration structure
- * @assert msg != NULL
- * @param msg - pointer in which the msg returned by the function is stored
- * @return true if spExtractionMode = true, false otherwise.
- *
- * - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
- * - SP_CONFIG_SUCCESS - in case of success
- */
 bool spConfigIsExtractionMode(const SPConfig config, SP_CONFIG_MSG* msg){
 	assert( msg != NULL );
 	if (config == NULL){
@@ -555,19 +564,21 @@ void spConfigDestroy(SPConfig config){
 	if (!config->spImagesSuffix == NULL){
 		free(config->spImagesSuffix);
 	}
-	//numOfImages is int
-	//spPCADimension is int
 	free(config->spPCAFilename);
-	//spNumOfFeatures is int
-	//spExtractionMode is bool and so Integer value - freed automatically
-	//spNumOfSimilarImages is int
-	//free(config->spKDTreeSplitMethod);
 
-	//spKNN is int
-	//spMinimalGUI is bool and so Integer value - freed automatically
-	//spLoggerLevel is int
+	/*numOfImages is int
+	*spPCADimension is int
+	*spNumOfFeatures is int
+	*spExtractionMode is bool and so Integer value - freed automatically
+	*spNumOfSimilarImages is int
+	*free(config->spKDTreeSplitMethod);
+	*spKNN is int
+	*spMinimalGUI is bool and so Integer value - freed automatically
+	*spLoggerLevel is int
+	*
+	*/
 
 	free(config->spLoggerFilename);
-
 	free(config);
+	return;
 }
