@@ -9,7 +9,6 @@
 
 #include "SPConfig.h"
 #include "SPPoint.h"
-#include <stdlib.h>
 
 typedef enum sp_extraction_msg {
         SP_EXTRACTION_INVALID_ARGUMENT,

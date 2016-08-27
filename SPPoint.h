@@ -1,3 +1,9 @@
+
+/*
+ *  SPPoint
+ *  Author: Yotam
+ */
+
 #ifndef SPPOINT_H_
 #define SPPOINT_H_
 
