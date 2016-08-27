@@ -6,7 +6,7 @@
 ## General:
 - [x] Be AWESOME
 - [x] Add SPPoint from assginment 3
-- [ ] Add BPQueue from assginment 3
+- [ ] Add SPBPQueue from assginment 3
 - [ ] Add SPLogger from assginment 3
 
 ## Shanee
