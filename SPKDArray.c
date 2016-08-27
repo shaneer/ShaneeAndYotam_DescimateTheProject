@@ -1,5 +1,5 @@
 /*
- *  SPKDArray code file
+ *  SPKDArray
  *  Author: Yotam
  */
 
@@ -32,11 +32,32 @@ int spKDArrayGetDimention(SPKDArray kdArr) {
         return kdArr->dim;
 }
 
-int spKDArrayGetNumberOfPoints(SPKDArray kdArr) {
+int spKDArrayGetSize(SPKDArray kdArr) {
         assert(kdArr != NULL);
         return kdArr->size;
 }
 
+SPPoint spKDArrayGetPoint(SPKDArray arr, int index) {
+        assert(arr != NULL && index < arr->size);
+        return arr->points[index];
+}
+
+int spKDArrayFindMaxSpreadDim(SPKDArray arr) {
+        assert(arr!=NULL);
+        int coorT = 0;
+        double spreadT = 0.0;
+        for (int i=0; i<arr->dim; i++) {
+                if ((spPointGetAxisCoor(arr->points[kdArray[i][arr->size-1]],i) - spPointGetAxisCoor(arr->points[kdArray[i][0]],i)) > spreadT) {
+                        spreadT = spPointGetAxisCoor(arr->points[kdArray[i][arr->size-1]],i) - spPointGetAxisCoor(arr->points[kdArray[i][0]],i);
+                        coorT = i;
+                }
+        }
+        return coorT;
+}
+
+/*
+ *  Return a copy of the point array
+ */
 SPPoint *spKDArrayGetPointsArray(SPKDArray spkdArr) {
         if (!spkdArr)
                 return NULL;
@@ -65,8 +86,7 @@ void fixTemoRowPointerPlacement(double **rowTmp, double *rowTmpV, int size) {
 }
 
 // helper for Init
-void initializeKDArrayMatrixSorted(SPKDArray spkdArr, double **rowTmp,
-                                   SPPoint *arr, int *kdArrayV, int size) {
+void initializeKDArrayMatrixSorted(SPKDArray spkdArr, double **rowTmp, SPPoint *arr, int *kdArrayV, int size) {
         int i, j;
         // initialize the kdArray matrix
         for (i = 0; i < spkdArr->dim; i++) {
@@ -101,8 +121,7 @@ SPKDArray Init(SPPoint *arr, int size) {
         spkdArr->kdArray = (int **)calloc(spkdArr->dim, sizeof(int *));
         int *kdArrayV = (int *)calloc((spkdArr->dim) * spkdArr->size, sizeof(int));
         double **rowTmp = (double **)calloc(spkdArr->size, sizeof(double *)); // freed
-        double *rowTmpV =
-                (double *)calloc(spkdArr->size * 2, sizeof(double)); // freed
+        double *rowTmpV = (double *)calloc(spkdArr->size * 2, sizeof(double)); // freed
 
         // if any allocation failed free all and return NULL
         if (!spkdArr->points || !spkdArr->kdArray || !kdArrayV || !rowTmp ||
@@ -136,7 +155,6 @@ SPKDArray Init(SPPoint *arr, int size) {
         // end memory allocation
 
         fixTemoRowPointerPlacement(rowTmp, rowTmpV, size);
-
         initializeKDArrayMatrixSorted(spkdArr, rowTmp, arr, kdArrayV, size);
 
         // free the temporary row
@@ -159,9 +177,7 @@ void updateXArrayforSPKDArray(SPKDArray kdArr, int *xArr, int midP, int coor) {
 }
 
 // helper for Split
-void updateMapsAndAddPointsToLists(SPKDArray kdArr, SPKDArray leftArr,
-                                   SPKDArray rightArr, SPPoint *pointTmp,
-                                   int *xArr, int *mapL, int *mapR) {
+void updateMapsAndAddPointsToLists(SPKDArray kdArr, SPKDArray leftArr, SPKDArray rightArr, SPPoint *pointTmp, int *xArr, int *mapL, int *mapR) {
         // update the maps and add point to correct list
         int i, j, k;
         j = 0;
@@ -184,8 +200,7 @@ void updateMapsAndAddPointsToLists(SPKDArray kdArr, SPKDArray leftArr,
 }
 
 // helper for Split
-void fixPointerPlacementForKDArrayMatrix(SPKDArray leftArr, SPKDArray rightArr,
-                                         int *kdArrayVL, int *kdArrayVR) {
+void fixPointerPlacementForKDArrayMatrix(SPKDArray leftArr, SPKDArray rightArr, int *kdArrayVL, int *kdArrayVR) {
         int i;
         // fix placement for kdArrays
         for (i = 0; i < leftArr->dim; i++) {
@@ -197,9 +212,7 @@ void fixPointerPlacementForKDArrayMatrix(SPKDArray leftArr, SPKDArray rightArr,
 }
 
 // helper for Split
-void recreateSortedKDArrayMatrixes(SPKDArray kdArr, SPKDArray leftArr,
-                                   SPKDArray rightArr, int *xArr, int *mapL,
-                                   int *mapR) {
+void recreateSortedKDArrayMatrixes(SPKDArray kdArr, SPKDArray leftArr, SPKDArray rightArr, int *xArr, int *mapL, int *mapR) {
         int i, j, k, l;
         // recreate sorted matrix
         for (i = 0; i < kdArr->dim; i++) {
@@ -244,13 +257,10 @@ SPKDArray *Split(SPKDArray kdArr, int coor) {
         rightArr->dim = kdArr->dim;                                    // right
         leftArr->points = (SPPoint *)calloc(leftArr->size, sizeof(SPPoint)); // left
         leftArr->kdArray = (int **)calloc(leftArr->dim, sizeof(int *)); // left
-        int *kdArrayVL =
-                (int *)calloc((leftArr->size) * (leftArr->dim), sizeof(int)); // left
-        rightArr->points =
-                (SPPoint *)calloc(rightArr->size, sizeof(SPPoint)); // right
+        int *kdArrayVL = (int *)calloc((leftArr->size) * (leftArr->dim), sizeof(int)); // left
+        rightArr->points = (SPPoint *)calloc(rightArr->size, sizeof(SPPoint)); // right
         rightArr->kdArray = (int **)calloc(rightArr->dim, sizeof(int *)); // right
-        int *kdArrayVR =
-                (int *)calloc((rightArr->size) * (rightArr->dim), sizeof(int)); // right
+        int *kdArrayVR = (int *)calloc((rightArr->size) * (rightArr->dim), sizeof(int)); // right
         // general allocation
         int *xArr = (int *)calloc(kdArr->size, sizeof(int)); // freed
         int *mapL = (int *)calloc(kdArr->size, sizeof(int)); // freed
@@ -280,12 +290,8 @@ SPKDArray *Split(SPKDArray kdArr, int coor) {
         // end memory allocation
 
         updateXArrayforSPKDArray(kdArr, xArr, midP, coor);
-
-        updateMapsAndAddPointsToLists(kdArr, leftArr, rightArr, pointTmp, xArr, mapL,
-                                      mapR);
-
+        updateMapsAndAddPointsToLists(kdArr, leftArr, rightArr, pointTmp, xArr, mapL, mapR);
         fixPointerPlacementForKDArrayMatrix(leftArr, rightArr, kdArrayVL, kdArrayVR);
-
         recreateSortedKDArrayMatrixes(kdArr, leftArr, rightArr, xArr, mapL, mapR);
 
         // place results
@@ -312,6 +318,9 @@ void spKDArrayDestroy(SPKDArray spkdArr) {
         return;
 }
 
+/*
+ *  Prints the SPKDAraay given
+ */
 void spKDArrayFullPrint(SPKDArray spkdArr) {
         char *m1 = "\nSPKDArray\n--------------\n";
         char *m2 = "- Points:\n";

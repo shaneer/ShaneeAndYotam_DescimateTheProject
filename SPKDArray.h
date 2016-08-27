@@ -1,11 +1,12 @@
 /*
-    KDArray Header File
+    KDArray
     Author: Yotam
-*/
+ */
 
-#include "SPPoint.h"
 #ifndef SPKDARRAY_H_
 #define SPKDARRAY_H_
+
+#include "SPPoint.h"
 
 typedef struct sp_kd_array* SPKDArray;
 
@@ -32,36 +33,36 @@ SPKDArray Init(SPPoint* arr, int size);
  *  @return
  *  NULL if error occured , otherwise returns two SPKDArray (kdLeft, kdRight).
  */
- SPKDArray* Split(SPKDArray spkdArr, int coor);
+SPKDArray* Split(SPKDArray spkdArr, int coor);
 
 /*
- *  Return a copy of the point array
+ *  Returns the coor index with the max spread
  */
- SPPoint* spKDArrayGetPointsArray(SPKDArray spkdArr);
+int spKDArrayFindMaxSpreadDim(SPKDArray arr);
+
+/*
+ *  Return the point at an index in the KDArray
+ */
+SPPoint spKDArrayGetPoint(SPKDArray arr, int index);
 
 /*
  *  Getter for the image-index at kdArr[i,j].
  */
- int spKDArrayGetIndexInArray(SPKDArray spkdArr, int i, int j);
+int spKDArrayGetIndexInArray(SPKDArray spkdArr, int i, int j);
 
 /*
  *  Getter for the dimention of the SPKDArray.
  */
- int spKDArrayGetDimention(SPKDArray spkdArr);
+int spKDArrayGetDimention(SPKDArray spkdArr);
 
 /*
  *  Getter for the amount of points in the SPKDArray.
  */
- int spKDArrayGetNumberOfPoints(SPKDArray spkdArr);
+int spKDArrayGetSize(SPKDArray spkdArr);
 
 /*
  *  Destroy the SPKDArray given and clear it's memory usage.
  */
- void spKDArrayDestroy(SPKDArray spkdArr);
-
-/*
- *  Prints the SPKDAraay given
- */
- void spKDArrayFullPrint(SPKDArray spkdArr);
+void spKDArrayDestroy(SPKDArray spkdArr);
 
 #endif // SPKDRAAY_H_
