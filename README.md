@@ -15,9 +15,9 @@
 
 ## Yotam
 - [x] KDArray
-- [ ] Load / Save
+- [x] Load / Save (further testing required)
 - [ ] Main Loop
-- [ ] Logger - Verify
+- [ ] Logger integration
 
 ## Notes
 1. Make sure that the logger was set at the beginning of the main function.
