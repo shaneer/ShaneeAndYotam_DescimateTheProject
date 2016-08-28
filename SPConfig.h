@@ -35,16 +35,16 @@ typedef enum sp_config_msg_t {
 	SP_CONFIG_INVALID_INTEGER,
 	SP_CONFIG_INVALID_STRING,
 	SP_CONFIG_INVALID_VALUE,			//Invalid value given to variable - doesn't match param type
-	//TODO - Warning vs. Error
+	//TODO - Warning vs. Error ?
 	SP_CONFIG_REDEFINE,					//Param defined more than once : WARNING?
 	SP_CONFIG_INVALID_ARGUMENT,
 	SP_CONFIG_INDEX_OUT_OF_RANGE,
 	SP_CONFIG_SUCCESS
 } SP_CONFIG_MSG;
 
-typedef enum sp_split_method_t{
-	MAX_SPREAD, RANDOM, INCREMENTAL
-}SP_SPLIT_METHOD;
+typedef enum SP_SPLIT_METHOD{					//TODO - did I change the header illegally?
+	MAX_SPREAD, RANDOM, INCREMENTAL, INVALID
+} ;
 
 typedef struct sp_config_t* SPConfig;
 
@@ -77,20 +77,20 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg);
 /**
  * TODO
  */
-void terminateDuringParse(SP_CONFIG_MSG* msg, SP_CONFIG_MSG print);
+void terminateDuringParse(SPConfig res, char* temp, char* paramName, char* value, FILE *fp, SP_CONFIG_MSG* msg, SP_CONFIG_MSG print);
 /**
  * TODO
  */
-SP_CONFIG_MSG checkvalid(SP_CONFIG_MSG* msg, SPConfig res);
+int checkvalid(SPConfig res, char* temp, char* paramName, char* value, FILE *fp, SP_CONFIG_MSG* msg, char* filename, int lineNum);
 
 /**
  * PRINT FUNCTIONS since logger is not yet initiialized
  */
-printConstraintsNotMet(char* filename, int lineNum);
+void printConstraintsNotMet(char* filename, int lineNum);
 
-printInvalidLine(char* filename, int lineNum);
+void printInvalidLine(char* filename, int lineNum);
 
-printParamNotSet(char* filename, int lineNum, char* paramName);
+void printParamNotSet(char* filename, int lineNum, char* paramName);
 /**
  * TODO
  */
@@ -99,25 +99,25 @@ int setDefaults(SPConfig config);
 /**
  * TODO
  */
-int readInt(char* val, int maxLength, int minLength);
+int readInt(char* value, int maxLength, int minLength, char* filename, int lineNum, SP_CONFIG_MSG* msg);
   /**
    * TODO
    */
-char* readStr(char* val);
+char* readStr(char* val, char* filename, int lineNum, SP_CONFIG_MSG* msg);
 
 
 /**
  * TODO
  */
-char* readSuffix(char* val);
+char* readSuffix(char* val, char* filename, int lineNum, SP_CONFIG_MSG* msg);
 /**
  * TODO
  */
-bool readBool(char* val);
+bool readBool(char* val, char* filename, int lineNum, SP_CONFIG_MSG* msg);
 /**
  * TODO
  */
-enum SP_SPLIT_METHOD readEnum(char* val);
+enum SP_SPLIT_METHOD readEnum(char* val, char* filename, int lineNum, SP_CONFIG_MSG* msg);
 
 bool isValidInt(char *str);
 bool isValidString(char *str);
