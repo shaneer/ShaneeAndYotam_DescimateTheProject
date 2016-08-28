@@ -28,7 +28,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 	char* temp;
 	char* value;
 	char* paramName;
-	int lineCount;
+	int lineNum;
 
 	temp = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
 			if (temp == NULL) {
@@ -68,7 +68,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 
 	while(! feof(fp)) {
 		fgets(temp, CONFIG_LINE_MAX_SIZE, fp);
-		lineCount++;								//Count starts at 1
+		lineNum++;								//Count starts at 1
 
 		//'Skips' over preceding whitespace
 		while ((*temp == ' ')||(*temp == '\t')||(*temp == '\v')){
@@ -253,14 +253,13 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 	return res;
 }
 
-void terminateDuringParse(SPConfig res, char* temp, char* paramName, char* value, FILE *fp, SP_CONFIG_MSG* msg, SP_CONFIG_MSG print){
+void terminateDuringParse(SPConfig res, char* temp, char* paramName, char* value, FILE *fp, SP_CONFIG_MSG* msg, SP_CONFIG_MSG out){
 	spConfigDestroy(res);
 	free(temp);
 	free(paramName);
 	free(value);
 	fclose(fp);
-	free(fp);
-	*msg = print;
+	*msg = out;
 	return;
 }
 
