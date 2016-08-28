@@ -42,9 +42,9 @@ typedef enum sp_config_msg_t {
 	SP_CONFIG_SUCCESS
 } SP_CONFIG_MSG;
 
-typedef enum SP_SPLIT_METHOD{					//TODO - did I change the header illegally?
+typedef enum sp_split_method_t{
 	MAX_SPREAD, RANDOM, INCREMENTAL, INVALID
-} ;
+}SP_SPLIT_METHOD;
 
 typedef struct sp_config_t* SPConfig;
 

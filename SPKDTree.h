@@ -23,9 +23,9 @@ typedef enum sp_KDTREE_msg_t {
 } SP_KDTREE_MSG;
 
 /**
- * Allocates a new KDTREE.
+ * Allocates a new KD Tree.
  *
- * This function creates a new empty KDTREE.
+ * This function creates a new empty KD Tree.
  * @return
  * 	NULL - If allocations failed.
  * 	A new KDTREE in case of success.
