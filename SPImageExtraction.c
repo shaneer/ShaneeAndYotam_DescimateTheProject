@@ -28,7 +28,7 @@ SP_EXTRACTION_MSG spExtractFromImage(SPPoint *feats, int numOfFeatures, int inde
         }
         for (i=0; i<numOfFeatures; i++) {
                 for (j=0; j<fDim; j++) {
-                        if (fprintf(fp, "%f ", feats[i][j]) < 0) {
+                        if (fprintf(fp, "%.4f ", feats[i][j]) < 0) {
                                 fclose(fp);
                                 return SP_EXTRACTION_FILE_ERROR;
                         }
@@ -66,7 +66,7 @@ SP_EXTRACTION_MSG spExtractFromFiles(const char* filename, SPPoint* arr) {
         // Allocation successful
         for (i=0; i<numOfFeatures; i++) {
                 for (j=0; j<fDim; j++) {
-                        if (fscanf(fp,"%f ", &(pData[j])) == 0) {
+                        if (fscanf(fp,"%.4f ", &(pData[j])) == 0) {
                                 free(arr);
                                 free(pData);
                                 fclose(fp);

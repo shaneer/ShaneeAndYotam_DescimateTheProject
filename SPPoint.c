@@ -1,3 +1,9 @@
+
+/*
+ *  SPPoint
+ *  Author: Yotam
+ */
+
 #include "SPPoint.h"
 #include <stdio.h>
 #include <stdlib.h>
