@@ -3,7 +3,7 @@
 #include "SPConfig.h"
 //#include "SPLogger.h"
 
-typedef struct sp_config_t{
+struct sp_config_t{
 	char* spImagesDirectory;
 	char* spImagesPrefix;
 	char* spImagesSuffix;
