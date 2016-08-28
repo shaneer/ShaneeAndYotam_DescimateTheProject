@@ -117,7 +117,7 @@ bool readBool(char* val, char* filename, int lineNum, SP_CONFIG_MSG* msg);
 /**
  * TODO
  */
-enum SP_SPLIT_METHOD readEnum(char* val, char* filename, int lineNum, SP_CONFIG_MSG* msg);
+SP_SPLIT_METHOD readEnum(char* val, char* filename, int lineNum, SP_CONFIG_MSG* msg);
 
 bool isValidInt(char *str);
 bool isValidString(char *str);
