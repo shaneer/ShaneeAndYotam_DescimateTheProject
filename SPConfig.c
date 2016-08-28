@@ -255,7 +255,6 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 
 void terminateDuringParse(SPConfig res, char* temp, char* paramName, char* value, FILE *fp, SP_CONFIG_MSG* msg, SP_CONFIG_MSG print){
 	spConfigDestroy(res);
-	free (res);
 	free(temp);
 	free(paramName);
 	free(value);
