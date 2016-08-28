@@ -21,7 +21,6 @@
 /**
  * A data-structure which is used for configuring the system.
  */
-
 typedef enum sp_config_msg_t {
 	SP_CONFIG_MISSING_DIR,
 	SP_CONFIG_MISSING_PREFIX,
@@ -117,7 +116,7 @@ bool readBool(char* val, char* filename, int lineNum, SP_CONFIG_MSG* msg);
 /**
  * TODO
  */
-enum SP_SPLIT_METHOD readEnum(char* val, char* filename, int lineNum, SP_CONFIG_MSG* msg);
+SP_SPLIT_METHOD readEnum(char* val, char* filename, int lineNum, SP_CONFIG_MSG* msg);
 
 bool isValidInt(char *str);
 bool isValidString(char *str);
