@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "SPConfig.h"
 #include <assert.h>
 #include "SPLogger.h"
@@ -101,7 +102,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 			*msg = SP_CONFIG_INVALID_LINE;
 			return NULL;
 		}
-		
+
 		//We now have temp which we will use to discover which param to use, and value which starts at =
 		++value;
 		while (isspace(*value)){
