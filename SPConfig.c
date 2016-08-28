@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include "SPConfig.h"
 #include <assert.h>
 //#include "SPLogger.h"
@@ -41,7 +42,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 		*msg = SP_CONFIG_CANNOT_OPEN_FILE;
 		free(temp);
 		if (strcmp(filename, "spcbir.config")==0){			//Tells us program is using default config, and it's faulty
-			printf(SP_CONFIG_FAULTY_DEFAULT);
+			printf("The default config file spcbir is faulty");
 		}
 		return NULL;
 	}
@@ -49,7 +50,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 	res = (SPConfig) malloc(sizeof(*res));
 	if (res == NULL) { 			//Allocation Fails
 		free(temp);
-		close(fp);
+		fclose(fp);
 		*msg = SP_CONFIG_ALLOC_FAIL;
 		return NULL;
 	}
@@ -60,12 +61,12 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 	if (defaults<0){
 		*msg = SP_CONFIG_ALLOC_FAIL;
 		free(temp);
-		close(fp);
+		fclose(fp);
 		return NULL;
 	}
 
 	//We now have a config object with all defaults set, we initialize line counter and begin to review file.
-	int lineNum = 0;
+	lineNum = 0;
 
 	while(! feof(fp)) {
 		fgets(temp, CONFIG_LINE_MAX_SIZE, fp);
@@ -86,7 +87,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 				free(temp);
 				spConfigDestroy(res);
 				*msg = SP_CONFIG_ALLOC_FAIL;
-				close(fp);
+				fclose(fp);
 				return NULL;
 			}
 		strcpy(value, strchr(temp, '='));
@@ -98,7 +99,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 			free(temp);
 			free(value);
 			spConfigDestroy(res);
-			close(fp);
+			fclose(fp);
 			*msg = SP_CONFIG_INVALID_LINE;
 			return NULL;
 		}
@@ -120,7 +121,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 				free(temp);
 				free(value);
 				spConfigDestroy(res);
-				close(fp);
+				fclose(fp);
 				*msg = SP_CONFIG_ALLOC_FAIL;
 				return NULL;
 			}
