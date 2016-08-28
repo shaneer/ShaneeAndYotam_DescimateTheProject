@@ -6,7 +6,7 @@
 ## General:
 - [x] Be AWESOME
 - [x] Add SPPoint from assginment 3
-- [ ] Add BPQueue from assginment 3
+- [ ] Add SPBPQueue from assginment 3
 - [ ] Add SPLogger from assginment 3
 
 ## Shanee
@@ -15,9 +15,9 @@
 
 ## Yotam
 - [x] KDArray
-- [ ] Load / Save
+- [x] Load / Save (further testing required)
 - [ ] Main Loop
-- [ ] Logger - Verify
+- [ ] Logger integration
 
 ## Notes
 1. Make sure that the logger was set at the beginning of the main function.
