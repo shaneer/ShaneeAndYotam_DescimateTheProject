@@ -298,24 +298,25 @@ void printConstraintsNotMet(char* filename, int lineNum){
 void printInvalidLine(char* filename, int lineNum){
 	printf("File: %s\nLine: %d\nMessage: Invalid configuration line",filename, lineNum );
 }
+//TODO
 void printParamNotSet(char* filename, int lineNum, char* paramName){
 	printf("File: %s\nLine: %d\nMessage: Parameter %s is not set",filename, lineNum, paramName );
 }
 
 int setDefaults(SPConfig config){
 	//ALLOC MEM FOR DEFAULTS
-	config->spPCAFilename = (char*) malloc(sizeof(char)*8);
+	config->spPCAFilename = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
 	if (config->spPCAFilename == NULL){
 		spConfigDestroy(config);
 		return -1;
 	}
-	config->spLoggerFilename = (char*) malloc(sizeof(char)*7);
+	config->spLoggerFilename = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
 	if (config->spLoggerFilename == NULL){
 		spConfigDestroy(config);
 		return -1;
 	}
 	config->spPCADimension = 20;
-	config->spPCAFilename = "pca.yml";
+	strcpy(config->spPCAFilename, "pca.yml");
 	config->spNumOfFeatures = 100;
 	config->spExtractionMode = 1;
 	config->spNumOfSimilarImages = 1;
@@ -323,7 +324,7 @@ int setDefaults(SPConfig config){
 	config->spKNN = 1;
 	config->spMinimalGUI = 0;
 	config->spLoggerLevel = 3;
-	config->spLoggerFilename = "stdout";
+	strcpy(config->spLoggerFilename, "stdout");
 
 	return 0;
 	}
@@ -389,7 +390,7 @@ bool readBool(char* val, char* filename, int lineNum, SP_CONFIG_MSG* msg){				//
 	}
 	if (!isValidString(val)){
 		printInvalidLine(filename, lineNum);
-		*msg = SP_CONFIG_INVALID_STRING;
+		*msg = SP_CONFIG_INVALID_LINE;
 		return NULL;
 	}
 	if ( strcmp(val,"true")==0 ){
@@ -439,8 +440,9 @@ bool isValidInt(char *str){
 		}
    //Check for non-digit chars in the rest of the string
    while (*str){
-      if (!isdigit(*str))
+      if (!isdigit(*str)){
          return false;
+      }
       else
          ++str;
    }
@@ -450,12 +452,13 @@ bool isValidInt(char *str){
 bool isValidString(char *str){
    if (!*str){
       return false;
-		}
+	}
    //Check for any spaces
    while (*str){
-      if ((*str)==' ' || (*str)=='#'){
+      if (isspace(*str) || (*str)=='#'){
          return false;
-			}else
+	}
+	else{
          ++str;
    }
    return true;
