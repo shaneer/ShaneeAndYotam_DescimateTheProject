@@ -1,7 +1,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include "SPConfig.h"
-#include <assert.h>
 //#include "SPLogger.h"
 
 typedef struct sp_config_t{
@@ -14,7 +13,7 @@ typedef struct sp_config_t{
 	int spNumOfFeatures;
 	bool spExtractionMode;
 	int spNumOfSimilarImages;
-	enum SP_SPLIT_METHOD spKDTreeSplitMethod;
+	SP_SPLIT_METHOD spKDTreeSplitMethod;
 	int spKNN;
 	bool spMinimalGUI;
 	int spLoggerLevel;
@@ -30,7 +29,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 	char* paramName;
 	int lineCount;
 
-	temp = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
+	temp = (char*) malloc(CONFIG_LINE_MAX_SIZE);
 			if (temp == NULL) {
 				*msg = SP_CONFIG_ALLOC_FAIL;
 				return NULL;
@@ -48,28 +47,17 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 	res = (SPConfig) malloc(sizeof(*res));
 	if (res == NULL) { //Allocation Fails
 		free(temp);
+		free(value);
 		*msg = SP_CONFIG_ALLOC_FAIL;
 		return NULL;
 	}
 
-	//We have now succesfully allocated memory for our config struct res, opened our config_file
-	// and allocated memory for temp. We begin by setting all the defaults.
-
-	int defaults = setDefaults(res);
-	if (defaults<0){
-		*msg = SP_CONFIG_ALLOC_FAIL;
-		free(temp);
-		close(fp);
-		free(fp);
-		return NULL;
-	}
-
-	//We now have a config object with all defaults set, we initialize line counter and begin to review file.
-	int lineNum = 0;
+	setDefaults(res);
+	lineCount = 0;
 
 	while(! feof(fp)) {
 		fgets(temp, CONFIG_LINE_MAX_SIZE, fp);
-		lineCount++;								//Count starts at 1
+		lineCount++;
 
 		//'Skips' over preceding whitespace
 		while ((*temp == ' ')||(*temp == '\t')||(*temp == '\v')){
@@ -79,18 +67,15 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 		if (temp[0] == '#'||*temp =='\n') {		//Skips comments and 'newline's
 			continue;
 		}
-
-		//Creates new string value which holds 'value to be assigned' portion of the line
+		//Creates new string value which holds value
 		value = (char*) realloc(value, strlen(temp));
 			if (value == NULL) {
 				free(temp);
 				free(res);
 				*msg = SP_CONFIG_ALLOC_FAIL;
-				close(fp);
-				free(fp);
 				return NULL;
 			}
-		strcpy(value, strchr(temp, '='));
+		value = strchr(temp, '=');
 
 		/*INVALID LINE since not long enough to be definition and we already skipped # and \n
 		OR no '=' meaning it cannot be used as an assignment
@@ -135,116 +120,102 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 
 		//Check all paramNames
 		if (strcmp(paramName, "spImagesDirectory")==0) {
-			res->spImagesDirectory = readStr(value, filename, lineNum, msg);
-			if (res->spImagesDirectory == NULL){
-				terminateDuringParse(res, temp, paramName, value, fp, msg, *msg);
+			config->spImagesDirectory = readString(value);
+			if (config->spImagesDirectory == NULL){
 				return NULL;
 			}
 		}
-		else if (strcmp(paramName, "spImagesPrefix")==0) {
-			res->spImagesPrefix = readStr(value, filename, lineNum, msg);
+		elif (strcmp(paramName, "spImagesPrefix")==0) {
+			res->spImagesPrefix = readString(value);
 			if (res->spImagesPrefix == NULL){
-				terminateDuringParse(res, temp, paramName, value, fp, msg, *msg);
 				return NULL;
 			}
 		}
-		else if (strcmp(paramName, "spImagesSuffix")==0) {
-			res->spImagesSuffix = readSuffix(value, filename, lineNum, msg);
+		elif (strcmp(paramName, "spImagesSuffix")==0) {
+			res->spImagesSuffix = readString(value);
 			if (res->spImagesSuffix == NULL){
-				terminateDuringParse(res, temp, paramName, value, fp, msg, *msg);
 				return NULL;
 			}
 		}
-		else if (strcmp(paramName, "spNumOfImages")==0) {
-			tempVal = readInt(value, INT_MAX, 0, filename, lineNum, msg);
+		elif (strcmp(paramName, "spNumOfImages")==0) {
+			tempVal = readInt(value, INT_MAX, 0);
 			if (tempVal == -1){
-				terminateDuringParse(res, temp, paramName, value, fp, msg, *msg);
 				return NULL;
 			}else
 			res->spNumOfImages = tempVal;
 		}
-		else if (strcmp(paramName, "spPCADimension")==0) {
-			tempVal = readInt(value, 28, 10, filename, lineNum, msg);
+		elif (strcmp(paramName, "spPCADimension")==0) {
+			tempVal = readInt(value, 28, 10);
 			if (tempVal == -1){
-				terminateDuringParse(res, temp, paramName, value, fp, msg, *msg);
 				return NULL;
 			}else
 			res->spPCADimension = tempVal;
 		}
-		else if (strcmp(paramName, "spPCAFilename")==0) {
-			res->spPCAFilename = readStr(value, filename, lineNum, msg);
+		elif (strcmp(paramName, "spPCAFilename")==0) {
+			res->spPCAFilename = readString(value);
 			if (res->spPCAFilename == NULL){
-				terminateDuringParse(res, temp, paramName, value, fp, msg, *msg);
 				return NULL;
 			}
 		}
-		else if (strcmp(paramName, "spNumOfFeatures")==0) {
-			tempVal = readInt(value, INT_MAX, 0, filename, lineNum, msg);
+		elif (strcmp(paramName, "spNumOfFeatures")==0) {
+			tempVal = readInt(value, INT_MAX, 0);
 			if (tempVal == -1){
-				terminateDuringParse(res, temp, paramName, value, fp, msg, *msg);
 				return NULL;
 			}else
 			res->spNumOfFeatures = tempVal;
 		}
-		else if (strcmp(paramName, "spExtractionMode")==0) {
-			res->spExtractionMode = readBool(value, filename, lineNum, msg);
+		elif (strcmp(paramName, "spExtractionMode")==0) {
+			res->spExtractionMode = readBool(value);
 			if (res->spExtractionMode == NULL){
-				terminateDuringParse(res, temp, paramName, value, fp, msg, *msg);
 				return NULL;
 			}
 		}
-		else if (strcmp(paramName, "spNumOfSimilarImages")==0) {
-			temp = readInt(value, INT_MAX, 1, filename, lineNum, msg);
-			if (tempVal == -1){
-				terminateDuringParse(res, temp, paramName, value, fp, msg, *msg);
+		elif (strcmp(paramName, "spNumOfSimilarImages")==0) {
+			temp = readInt(value, INT_MAX, 1);
+			if (temp == -1){
 				return NULL;
 			}else
 			res->spNumOfSimilarImages = temp;
 		}
-		else if (strcmp(paramName, "spKDTreeSplitMethod")==0) {
-			res->spKDTreeSplitMethod = readEnum(value, filename, lineNum, msg);
-			if (res->spKDTreeSplitMethod == INVALID){
-				terminateDuringParse(res, temp, paramName, value, fp, msg, *msg);
+		elif (strcmp(paramName, "spKDTreeSplitMethod")==0) {
+			res->spKDTreeSplitMethod = readEnum(value);
+			if (res->spKDTreeSplitMethod == NULL){
 				return NULL;
 			}
 		}
-		else if (strcmp(paramName, "spKNN")==0) {
-			temp = readInt(value, INT_MAX, 1, filename, lineNum, msg);
-			if (tempVal == -1){
-				terminateDuringParse(res, temp, paramName, value, fp, msg, *msg);
+		elif (strcmp(paramName, "spKNN")==0) {
+			temp = readInt(value, INT_MAX, 1);
+			if (temp == -1){
 				return NULL;
 			}else
 			res->spKNN = tempVal;
 		}
-		else if (strcmp(paramName, "spMinimalGUI")==0) {
-			res->spMinimalGUI = readBool(value, filename, lineNum, msg);
+		elif (strcmp(paramName, "spMinimalGUI")==0) {
+			res->spMinimalGUI = readBool(value);
 			if (res->spMinimalGUI == NULL){
-				terminateDuringParse(res, temp, paramName, value, fp, msg, *msg);
 				return NULL;
 			}
 		}
-		else if (strcmp(paramName, "spLoggerLevel")==0) {
-			temp = readInt(value, 4, 1, filename, lineNum, msg);
-			if (tempVal == -1){
-				terminateDuringParse(res, temp, paramName, value, fp, msg, *msg);
+		elif (strcmp(paramName, "spLoggerLevel")==0) {
+			temp = readInt(value, 4, 1);
+			if (temp == -1){
 				return NULL;
 			}else
 			res->spLoggerLevel = tempVal;
 		}
-		else if (strcmp(paramName, "spLoggerFilename")==0) {
-			res->spLoggerFilename = readStr(value, filename, lineNum, msg);
+		elif (strcmp(paramName, "spLoggerFilename")==0) {
+			res->spLoggerFilename = readString(value);
 			if (res->spLoggerFilename == NULL){
-				terminateDuringParse(res, temp, paramName, value, fp, msg, *msg);
 				return NULL;
 			}
 		}
 		else {
-		terminateDuringParse(res, temp, paramName, value, fp, msg, SP_CONFIG_INVALID_ARGUMENT);
+		terminateDuringParse(msg, SP_CONFIG_INVALID_ARGUMENT);
 		return NULL;
 		}
 	}
 
-	int check = checkvalid(res, temp, paramName, value, fp, msg, filename, lineNum);
+	int check = checkvalid(res);
 	if (check<0){
 		return NULL;
 	}
@@ -254,7 +225,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 	return res;
 }
 
-void terminateDuringParse(SPConfig res, char* temp, char* paramName, char* value, FILE *fp, SP_CONFIG_MSG* msg, SP_CONFIG_MSG print){
+void terminateDuringParse(SP_CONFIG_MSG* msg, SP_CONFIG_MSG print){
 	spConfigDestroy(res);
 	free (res);
 	free(temp);
@@ -266,56 +237,54 @@ void terminateDuringParse(SPConfig res, char* temp, char* paramName, char* value
 	return;
 }
 
-int checkvalid(SPConfig res, char* temp, char* paramName, char* value, FILE *fp,
-		SP_CONFIG_MSG* msg, char* filename, int lineNum){
+int checkvalid(SP_CONFIG_MSG* msg, SPConfig res){
 	if (res == NULL){
 		return -1;
 	}
 	if ( res->spImagesDirectory==NULL){
 		printParamNotSet(filename, lineNum, "spImagesDirectory");
-		terminateDuringParse(res, temp, paramName, value, fp, msg, SP_CONFIG_MISSING_DIR);
+		terminateDuringParse(msg, SP_CONFIG_MISSING_DIR);
 		return -1;
 	}
-	else if ( res->spImagesPrefix==NULL){
+	elif ( res->spImagesPrefix==NULL){
 		printParamNotSet(filename, lineNum, "spImagesPrefix");
-		terminateDuringParse(res, temp, paramName, value, fp, msg, SP_CONFIG_MISSING_PREFIX);
+		terminateDuringParse(msg, SP_CONFIG_MISSING_PREFIX);
 		return -1;
 	}
-	else if ( res->spImagesSuffix==NULL){
+	elif ( res->spImagesSuffix==NULL){
 		printParamNotSet(filename, lineNum, "spImagesSuffix");
-		terminateDuringParse(res, temp, paramName, value, fp, msg, SP_CONFIG_MISSING_SUFFIX);
+		terminateDuringParse(msg, SP_CONFIG_MISSING_SUFFIX);
 		return -1;
 	}
-	else if ( res->spNumOfImages==NULL){
+	elif ( res->spNumOfImages==NULL){
 		printParamNotSet(filename, lineNum, "spNumOfImages");
-		terminateDuringParse(res, temp, paramName, value, fp, msg, SP_CONFIG_MISSING_NUM_IMAGES);
+		terminateDuringParse(msg, SP_CONFIG_MISSING_NUM_IMAGES);
 		return -1;
 	}
-	return 0;
 }
 
 //PRINTING ERROR MESSAGES TO CONSOLE
-void printConstraintsNotMet(char* filename, int lineNum){
-	printf("File: %s\nLine: %d\nMessage: Invalid value - constraint not met",filename, lineNum );
+printConstraintsNotMet(char* filename, int lineNum){
+	printf(“File: %s\nLine: %d\nMessage: Invalid value - constraint not met”, filename, lineNum);
 }
-void printInvalidLine(char* filename, int lineNum){
-	printf("File: %s\nLine: %d\nMessage: Invalid configuration line",filename, lineNum );
+printInvalidLine(char* filename, int lineNum){
+	printf(“File: %s\nLine: %d\nMessage: Invalid configuration line” , filename, lineNum);
 }
-void printParamNotSet(char* filename, int lineNum, char* paramName){
-	printf("File: %s\nLine: %d\nMessage: Parameter %s is not set",filename, lineNum, paramName );
+printParamNotSet(char* filename, int lineNum, char* paramName){
+	printf(“File: %s\nLine: %d\nMessage: Parameter %s is not set” , filename, lineNum, paramName);
 }
 
 int setDefaults(SPConfig config){
 	//ALLOC MEM FOR DEFAULTS
 	config->spPCAFilename = (char*) malloc(sizeof(char)*8);
 	if (config->spPCAFilename == NULL){
-		spConfigDestroy(config);
-		return -1;
+		free(config);
+		return NULL;
 	}
 	config->spLoggerFilename = (char*) malloc(sizeof(char)*7);
 	if (config->spLoggerFilename == NULL){
-		spConfigDestroy(config);
-		return -1;
+		free(config);
+		return NULL;
 	}
 	config->spPCADimension = 20;
 	config->spPCAFilename = "pca.yml";
@@ -328,111 +297,110 @@ int setDefaults(SPConfig config){
 	config->spLoggerLevel = 3;
 	config->spLoggerFilename = "stdout";
 
-	return 0;
+	return 1;
 	}
 
 //HELPER FUNCTIONS TO LOAD DATA FROM STRING FORN IN CONFIG LINE
-int readInt(char* value, int maxLength, int minLength, char* filename, int lineNum, SP_CONFIG_MSG* msg){
-	int num;
+int readInt(char* value, int maxLength, int minLength){
 	if (isValidInt(value)){
-		num = atoi(value);
+		int num = atoi(value);
 	}else{
-		printInvalidLine(filename, lineNum);
-		*msg = SP_CONFIG_INVALID_ARGUMENT;
+		printInvalidLine(filename, lineCount);
+		terminateDuringParse(msg, SP_CONFIG_INVALID_ARGUMENT);
 		return -1;
 	}
-	if( minLength <= num && num<=maxLength ){
+	if( minLength<=num && num<=maxLength ){
 		return num;
 	}else {
-		printConstraintsNotMet(filename, lineNum);
-		*msg = SP_CONFIG_INVALID_INTEGER;
+		printConstraintsNotMet(filename, lineCount);
+		terminateDuringParse(msg, SP_CONFIG_INVALID_INTEGER);
 		return -1;
 	}
 }
 
-char* readStr(char* val, char* filename, int lineNum, SP_CONFIG_MSG* msg){
+char* readStr(char* val){
 	if (val == NULL){
-		printInvalidLine(filename, lineNum);
-		*msg = SP_CONFIG_INVALID_STRING;
+		printInvalidLine(filename, lineCount);
+		terminateDuringParse(msg, SP_CONFIG_INVALID_STRING);
 		return NULL;
 	}
 	if (isValidString(val)){
 		return val;
 	}else{
-		printInvalidLine(filename, lineNum);
-		*msg =SP_CONFIG_INVALID_STRING;
+		printInvalidLine(filename, lineCount);
+		terminateDuringParse(msg, SP_CONFIG_INVALID_STRING);
 		return NULL;
 	}
 }
 
-char* readSuffix(char* val, char* filename, int lineNum, SP_CONFIG_MSG* msg){
+char* readSuffix(char* val){
 	if (val == NULL){
-		printInvalidLine(filename, lineNum);
-		*msg = SP_CONFIG_INVALID_STRING;
+		printInvalidLine(filename, lineCount);
+		terminateDuringParse(msg, SP_CONFIG_INVALID_STRING);
 		return NULL;
 	}
 	if (!isValidString(val)){
-		printInvalidLine(filename, lineNum);
-		*msg = SP_CONFIG_INVALID_STRING;
+		printInvalidLine(filename, lineCount);
+		terminateDuringParse(msg, SP_CONFIG_INVALID_STRING);
 		return NULL;
 	}
-	if ( (strcmp(val,".png")==0) || (strcmp(val,".bmp")==0) || (strcmp(val,".jpg")==0) || (strcmp(val,".gif")==0) ){
-		return val;
+	if (!(strcmp(val,".png") || strcmp(val,".bmp") ||strcmp(val,".jpg") ||strcmp(val,".gif")){
+		printInvalidLine(filename, lineCount);
+		terminateDuringParse(msg, SP_CONFIG_INVALID_STRING);
+		return NULL;
 	}
-	printInvalidLine(filename, lineNum);
-	*msg =  SP_CONFIG_INVALID_STRING;
-	return NULL;
+	return val;
 }
 
-bool readBool(char* val, char* filename, int lineNum, SP_CONFIG_MSG* msg){				//TODO - can the user define bool as 0/1 does case matter True/true/tRue??
+bool readBool(char* val){				//TODO - can the user define bool as 0/1 does case matter True/true/tRue??
 	if (val == NULL){
-		printInvalidLine(filename, lineNum);
-		*msg = SP_CONFIG_INVALID_ARGUMENT;
+		printInvalidLine(filename, lineCount);
+		terminateDuringParse(msg, SP_CONFIG_INVALID_ARGUMENT);
 		return NULL;
 	}
 	if (!isValidString(val)){
-		printInvalidLine(filename, lineNum);
-		*msg = SP_CONFIG_INVALID_STRING;
+		printInvalidLine(filename, lineCount);
+		terminateDuringParse(msg, SP_CONFIG_INVALID_STRING);
 		return NULL;
 	}
-	if ( strcmp(val,"true")==0 ){
+	if ((strcmp(val,"true")){
 		return true;
 	}
-	else if ( strcmp(val,"true")==0 ){
+	elif ((strcmp(val,"true")){
 		return false;
-	}
-	printInvalidLine(filename, lineNum);
-	*msg = SP_CONFIG_INVALID_STRING;
+	}else
+	printInvalidLine(filename, lineCount);
+	terminateDuringParse(msg, SP_CONFIG_INVALID_STRING);
 	return NULL;
 }
 
-enum SP_SPLIT_METHOD readEnum(char* val, char* filename, int lineNum, SP_CONFIG_MSG* msg){
+enum SP_SPLIT_METHOD readEnum(char* val){
 	if (val == NULL){
-		printInvalidLine(filename, lineNum);
-		*msg = SP_CONFIG_INVALID_ARGUMENT;
-		return INVALID;
+		printInvalidLine(filename, lineCount);
+		terminateDuringParse(msg, SP_CONFIG_INVALID_ARGUMENT);
+		return NULL;
 	}
 	if (!isValidString(val)){
-		printInvalidLine(filename, lineNum);
-		*msg = SP_CONFIG_INVALID_STRING;
-		return INVALID;
+		printInvalidLine(filename, lineCount);
+		terminateDuringParse(msg, SP_CONFIG_INVALID_STRING);
+		return NULL;
 	}
 	enum SP_SPLIT_METHOD method;
-	if (strcmp(val,"MAX_SPREAD")==0){
+	if ((strcmp(val,"MAX_SPREAD")){
 		method = MAX_SPREAD;
 		return method;
 	}
-	else if (strcmp(val,"RANDOM")==0){
+	elif ((strcmp(val,"RANDOM")){
 		method = RANDOM;
 		return method;
 	}
-	else if (strcmp(val,"INCREMENTAL")==0){
+	elif ((strcmp(val,"INCREMENTAL")){
 		method = INCREMENTAL;
 		return method;
-	}
-	printInvalidLine(filename, lineNum);
-	*msg = SP_CONFIG_INVALID_STRING;
-	return INVALID;
+	}else
+	printInvalidLine(filename, lineCount);
+	terminateDuringParse(msg, SP_CONFIG_INVALID_STRING);
+	return NULL;
 }
 
 bool isValidInt(char *str){
