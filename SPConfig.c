@@ -4,7 +4,7 @@
 #include <assert.h>
 //#include "SPLogger.h"
 
-typedef struct sp_config_t{
+struct sp_config_t{
 	char* spImagesDirectory;
 	char* spImagesPrefix;
 	char* spImagesSuffix;
@@ -54,7 +54,6 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 
 	//We have now succesfully allocated memory for our config struct res, opened our config_file
 	// and allocated memory for temp. We begin by setting all the defaults.
-
 	int defaults = setDefaults(res);
 	if (defaults<0){
 		*msg = SP_CONFIG_ALLOC_FAIL;
@@ -597,7 +596,6 @@ void spConfigDestroy(SPConfig config){
 		free(config->spImagesSuffix);
 	}
 	free(config->spPCAFilename);
-
 	/*numOfImages is int
 	*spPCADimension is int
 	*spNumOfFeatures is int
@@ -609,7 +607,6 @@ void spConfigDestroy(SPConfig config){
 	*spLoggerLevel is int
 	*
 	*/
-
 	free(config->spLoggerFilename);
 	free(config);
 	return;
