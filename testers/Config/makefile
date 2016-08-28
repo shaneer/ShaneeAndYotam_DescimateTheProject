@@ -1,5 +1,5 @@
 CC = gcc
-OBJS = SPConfig_Unit_Test.o SPConfig.o SPLogger.o
+OBJS = SPConfig_Unit_Test.o SPConfig.o
 EXEC = SPConfig_Unit_Test
 TESTS_DIR = ./testers/Config
 COMP_FLAG = -std=c99 -Wall -Wextra \
@@ -7,11 +7,9 @@ COMP_FLAG = -std=c99 -Wall -Wextra \
 
 $(EXEC): $(OBJS)
 	$(CC) $(OBJS) -o $@
-SPConfig_Unit_Test.o: $(TESTS_DIR)/SPConfig_Unit_Test.c $(TESTS_DIR)/unit_test_util.h SPLogger.h SPConfig.h
+SPConfig_Unit_Test.o: $(TESTS_DIR)/SPConfig_Unit_Test.c $(TESTS_DIR)/unit_test_util.h SPConfig.h
 	$(CC) $(COMP_FLAG) -c $(TESTS_DIR)/$*.c
-SPConfig.o: SPConfig.c SPLogger.h
-	$(CC) $(COMP_FLAG) -c $*.c
-SPLogger.o: SPLogger.c SPLogger.h
+SPConfig.o: SPConfig.c
 	$(CC) $(COMP_FLAG) -c $*.c
 clean:
 	rm -f $(OBJS) $(EXEC)
