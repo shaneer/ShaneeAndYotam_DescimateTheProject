@@ -31,10 +31,10 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 	int lineNum;
 
 	temp = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
-			if (temp == NULL) {
-				*msg = SP_CONFIG_ALLOC_FAIL;
-				return NULL;
-			}
+		if (temp == NULL) {
+			*msg = SP_CONFIG_ALLOC_FAIL;
+			return NULL;
+		}
 
 	if((fp = fopen(filename, "r")) == NULL){
 		*msg = SP_CONFIG_CANNOT_OPEN_FILE;
@@ -43,11 +43,12 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 			printf(SP_CONFIG_FAULTY_DEFAULT);
 		}
 		return NULL;
-		}
+	}
 
 	res = (SPConfig) malloc(sizeof(*res));
-	if (res == NULL) { //Allocation Fails
+	if (res == NULL) { 			//Allocation Fails
 		free(temp);
+		close(fp);
 		*msg = SP_CONFIG_ALLOC_FAIL;
 		return NULL;
 	}
@@ -59,7 +60,6 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 		*msg = SP_CONFIG_ALLOC_FAIL;
 		free(temp);
 		close(fp);
-		free(fp);
 		return NULL;
 	}
 
@@ -404,7 +404,7 @@ bool readBool(char* val, char* filename, int lineNum, SP_CONFIG_MSG* msg){				//
 	return NULL;
 }
 
-enum SP_SPLIT_METHOD readEnum(char* val, char* filename, int lineNum, SP_CONFIG_MSG* msg){
+SP_SPLIT_METHOD readEnum(char* val, char* filename, int lineNum, SP_CONFIG_MSG* msg){
 	if (val == NULL){
 		printInvalidLine(filename, lineNum);
 		*msg = SP_CONFIG_INVALID_ARGUMENT;
@@ -415,7 +415,7 @@ enum SP_SPLIT_METHOD readEnum(char* val, char* filename, int lineNum, SP_CONFIG_
 		*msg = SP_CONFIG_INVALID_STRING;
 		return INVALID;
 	}
-	enum SP_SPLIT_METHOD method;
+	SP_SPLIT_METHOD method;
 	if (strcmp(val,"MAX_SPREAD")==0){
 		method = MAX_SPREAD;
 		return method;
@@ -429,7 +429,7 @@ enum SP_SPLIT_METHOD readEnum(char* val, char* filename, int lineNum, SP_CONFIG_
 		return method;
 	}
 	printInvalidLine(filename, lineNum);
-	*msg = SP_CONFIG_INVALID_STRING;
+	*msg = SP_CONFIG_INVALID_LINE;
 	return INVALID;
 }
 
@@ -587,13 +587,13 @@ void spConfigDestroy(SPConfig config){
 	if (config == NULL){
 		return;
 	}
-	if (!config->spImagesDirectory == NULL){
+	if (config->spImagesDirectory != NULL){
 		free(config->spImagesDirectory);
 	}
-	if (!config->spImagesPrefix == NULL){
+	if (config->spImagesPrefix != NULL){
 		free(config->spImagesPrefix);
 	}
-	if (!config->spImagesSuffix == NULL){
+	if (config->spImagesSuffix != NULL){
 		free(config->spImagesSuffix);
 	}
 	free(config->spPCAFilename);
