@@ -71,11 +71,11 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 		lineNum++;								//Count starts at 1
 
 		//'Skips' over preceding whitespace
-		while ((*temp == ' ')||(*temp == '\t')||(*temp == '\v')){
+		while (isspace(*temp)){
 			++temp;
 		}
 		//Skips comments and 'newline's
-		if (temp[0] == '#'||*temp =='\n') {		//Skips comments and 'newline's
+		if (*temp == '#'||*temp =='\n'||*temp =='\0') {		//Skips comments and 'newline's
 			continue;
 		}
 
@@ -83,10 +83,9 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 		value = (char*) realloc(value, strlen(temp));
 			if (value == NULL) {
 				free(temp);
-				free(res);
+				spConfigDestroy(res);
 				*msg = SP_CONFIG_ALLOC_FAIL;
 				close(fp);
-				free(fp);
 				return NULL;
 			}
 		strcpy(value, strchr(temp, '='));
@@ -96,19 +95,21 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 		*/
 		if (strlen(temp)<MIN_LENGTH_OF_CONFIG_LINE || value==NULL || strlen(value)<2) {	//value must have at least one char other then newline
 			free(temp);
-			free(res);
+			free(value);
+			spConfigDestroy(res);
+			close(fp);
 			*msg = SP_CONFIG_INVALID_LINE;
 			return NULL;
 		}
+		
 		//We now have temp which we will use to discover which param to use, and value which starts at =
 		++value;
-		while ((*value == ' ')||(*value == '\t')||(*value == '\v')){
+		while (isspace(*value)){
 			++value;
 		}
 		//Remove spaces at end
-		//TODO make function
 		int end = strlen(value)-1;
-		while (isspace(value[end])||(value[end] == '\n')){
+		while (isspace(value[end])){
 			--end;
 		}
 		value[end+1]='\0';
@@ -117,7 +118,8 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 			if (paramName == NULL) {
 				free(temp);
 				free(value);
-				free(res);
+				spConfigDestroy(res);
+				close(fp);
 				*msg = SP_CONFIG_ALLOC_FAIL;
 				return NULL;
 			}
@@ -193,12 +195,12 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 			}
 		}
 		else if (strcmp(paramName, "spNumOfSimilarImages")==0) {
-			temp = readInt(value, INT_MAX, 1, filename, lineNum, msg);
+			tempVal = readInt(value, INT_MAX, 1, filename, lineNum, msg);
 			if (tempVal == -1){
 				terminateDuringParse(res, temp, paramName, value, fp, msg, *msg);
 				return NULL;
 			}else
-			res->spNumOfSimilarImages = temp;
+			res->spNumOfSimilarImages = tempVal;
 		}
 		else if (strcmp(paramName, "spKDTreeSplitMethod")==0) {
 			res->spKDTreeSplitMethod = readEnum(value, filename, lineNum, msg);
@@ -208,7 +210,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 			}
 		}
 		else if (strcmp(paramName, "spKNN")==0) {
-			temp = readInt(value, INT_MAX, 1, filename, lineNum, msg);
+			tempVal = readInt(value, INT_MAX, 1, filename, lineNum, msg);
 			if (tempVal == -1){
 				terminateDuringParse(res, temp, paramName, value, fp, msg, *msg);
 				return NULL;
@@ -223,7 +225,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 			}
 		}
 		else if (strcmp(paramName, "spLoggerLevel")==0) {
-			temp = readInt(value, 4, 1, filename, lineNum, msg);
+			tempVal = readInt(value, 4, 1, filename, lineNum, msg);
 			if (tempVal == -1){
 				terminateDuringParse(res, temp, paramName, value, fp, msg, *msg);
 				return NULL;
@@ -238,7 +240,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 			}
 		}
 		else {
-		terminateDuringParse(res, temp, paramName, value, fp, msg, SP_CONFIG_INVALID_ARGUMENT);
+		terminateDuringParse(res, temp, paramName, value, fp, msg, SP_CONFIG_INVALID_LINE);
 		return NULL;
 		}
 	}
@@ -249,7 +251,6 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 	}
 	*msg = SP_CONFIG_SUCCESS;
 	fclose(fp);
-	free(fp);
 	return res;
 }
 
