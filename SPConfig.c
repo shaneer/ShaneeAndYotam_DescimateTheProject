@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include "SPConfig.h"
 #include <assert.h>
-#include "SPLogger.h"
+//#include "SPLogger.h"
 
 struct sp_config_t{
 	char* spImagesDirectory;
