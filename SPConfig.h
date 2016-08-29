@@ -81,16 +81,16 @@ void terminateDuringParse(SPConfig res, char* temp, char* paramName, char* value
 /**
  * TODO
  */
-int checkvalid(SPConfig res, char* temp, char* paramName, char* value, FILE *fp, SP_CONFIG_MSG* msg, char* filename, int lineNum);
+int checkvalid(SPConfig res, char* temp, char* paramName, char* value, FILE *fp, SP_CONFIG_MSG* msg, const char* filename, int lineNum);
 
 /**
  * PRINT FUNCTIONS since logger is not yet initiialized
  */
-void printConstraintsNotMet(char* filename, int lineNum);
+void printConstraintsNotMet(const char* filename, int lineNum);
 
-void printInvalidLine(char* filename, int lineNum);
+void printInvalidLine(const char* filename, int lineNum);
 
-void printParamNotSet(char* filename, int lineNum, char* paramName);
+void printParamNotSet(const char* filename, int lineNum, char* paramName);
 /**
  * TODO
  */
@@ -99,25 +99,25 @@ int setDefaults(SPConfig config);
 /**
  * TODO
  */
-int readInt(char* value, int maxLength, int minLength, char* filename, int lineNum, SP_CONFIG_MSG* msg);
+int readInt(char* value, int maxLength, int minLength, const char* filename, int lineNum, SP_CONFIG_MSG* msg);
   /**
    * TODO
    */
-char* readStr(char* val, char* filename, int lineNum, SP_CONFIG_MSG* msg);
+char* readStr(char* val, const char* filename, int lineNum, SP_CONFIG_MSG* msg);
 
 
 /**
  * TODO
  */
-char* readSuffix(char* val, char* filename, int lineNum, SP_CONFIG_MSG* msg);
+char* readSuffix(char* val, const char* filename, int lineNum, SP_CONFIG_MSG* msg);
 /**
  * TODO
  */
-bool readBool(char* val, char* filename, int lineNum, SP_CONFIG_MSG* msg);
+bool readBool(char* val, const char* filename, int lineNum, SP_CONFIG_MSG* msg);
 /**
  * TODO
  */
-SP_SPLIT_METHOD readEnum(char* val, char* filename, int lineNum, SP_CONFIG_MSG* msg);
+SP_SPLIT_METHOD readEnum(char* val, const char* filename, int lineNum, SP_CONFIG_MSG* msg);
 
 bool isValidInt(char *str);
 bool isValidString(char *str);
