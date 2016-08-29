@@ -6,18 +6,18 @@
  *
  * Implements a list element which contains an index and a double value.
  * An element contains:
- * 		int int
- * 		double value
+ *      int int
+ *      double value
  * Two elements e1 and e2 are said to be equal iff:
- * 		(e1.index == e2.index) AND (e1.value == e2.value)
+ *      (e1.index == e2.index) AND (e1.value == e2.value)
  * Element e1 is less than element e2 iff:
- * 		(e1.value < e2.value)   OR (e1.value == e2.value AND e1.index < e2.index)
+ *      (e1.value < e2.value)   OR (e1.value == e2.value AND e1.index < e2.index)
  * Element e1 is greater than element e2 iff:
- * 		(e2 is less than e1)
+ *      (e2 is less than e1)
  *
  * The following functions are available
  *	spListElementCreate    - Creates a new element the corresponding int and double value
- *	spListElementCopy 	   - Creates a new copy of the target element
+ *	spListElementCopy      - Creates a new copy of the target element
  *	spListElementDestroy   - Free all memory allocations associated with an element
  *	spListElementcompare   - Compares two elements
  *	spListElementSetIndex  - Sets a new index to the target element
@@ -28,9 +28,9 @@
 
 /** Type used for error reporting in SPListElement*/
 typedef enum SP_LIST_ELEMENT_RESULT_t {
-	SP_ELEMENT_SUCCESS,
-	SP_ELEMENT_INVALID_ARGUMENT,
-	SP_ELEMENT_OUT_OF_MEMORY
+    SP_ELEMENT_SUCCESS,
+    SP_ELEMENT_INVALID_ARGUMENT,
+    SP_ELEMENT_OUT_OF_MEMORY
 } SP_ELEMENT_MSG;
 
 /** Type used represent an element in the list **/
@@ -56,11 +56,11 @@ SPListElement spListElementCreate(int index, double value);
  * The comparison is made based on the following relation:
  *
  * Two elements e1 and e2 are said to be equal iff:
- * 		(e1.index == e2.index) AND (e1.value == e2.value)
+ *      (e1.index == e2.index) AND (e1.value == e2.value)
  * Element e1 is less than element e2 iff:
- * 		(e1.value < e2.value)   OR (e1.value == e2.value AND e1.index < e2.index)
+ *      (e1.value < e2.value)   OR (e1.value == e2.value AND e1.index < e2.index)
  * Element e1 is greater than element e2 iff:
- * 		(e2 is less than e1)
+ *      (e2 is less than e1)
  *
  * @param data - The target element which will be copied
  * @return
@@ -74,7 +74,7 @@ SPListElement spListElementCopy(SPListElement data);
  * All memory allocation associated with the element will be freed
  *
  * @param data the target element which will be freed.
- * 			   if data is NULL, then nothing is done
+ *             if data is NULL, then nothing is done
  */
 void spListElementDestroy(SPListElement data);
 
@@ -93,7 +93,7 @@ void spListElementDestroy(SPListElement data);
 int spListElementCompare(SPListElement e1, SPListElement e2);
 
 /**
- * 	A setter for the index of the target element.
+ *  A setter for the index of the target element.
  *  The new index must be greater or equal to 0
  *
  *  @param data   The target element
@@ -116,7 +116,7 @@ SP_ELEMENT_MSG spListElementSetIndex(SPListElement data, int index);
 int spListElementGetIndex(SPListElement data);
 
 /**
- * 	A setter for the value of the target element.
+ *  A setter for the value of the target element.
  *  The new index must be greater or equal to 0
  *
  *  @param data   The target element
