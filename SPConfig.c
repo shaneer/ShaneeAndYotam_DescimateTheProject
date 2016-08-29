@@ -36,6 +36,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 	value = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
 	paramName = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
 	res = (SPConfig) malloc(sizeof(*res));
+
 		if (temp == NULL || value==NULL || paramName==NULL || res==NULL) {
 			free(temp);
 			free(value);
@@ -60,7 +61,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 	//We have now succesfully allocated memory for our config struct res, opened our config_file
 	// and allocated memory for temp. We begin by setting all the defaults.
 	int defaults = setDefaults(res);
-	if (defaults<0){
+	if (defaults == -1){
 		*msg = SP_CONFIG_ALLOC_FAIL;
 		free(temp);
 		free(value);
@@ -543,15 +544,9 @@ void spConfigDestroy(SPConfig config){
 	if (config == NULL){
 		return;
 	}
-	if (config->spImagesDirectory != NULL){
-		free(config->spImagesDirectory);
-	}
-	if (config->spImagesPrefix != NULL){
-		free(config->spImagesPrefix);
-	}
-	if (config->spImagesSuffix != NULL){
-		free(config->spImagesSuffix);
-	}
+	free(config->spImagesDirectory);
+	free(config->spImagesPrefix);
+	free(config->spImagesSuffix);
 	free(config->spPCAFilename);
 	/*numOfImages is int
 	*spPCADimension is int
