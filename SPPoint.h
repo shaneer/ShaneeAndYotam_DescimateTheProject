@@ -15,9 +15,9 @@
  *
  * The following functions are supported:
  *
- * spPointCreate        	- Creates a new point
+ * spPointCreate            - Creates a new point
  * spPointCopy				- Create a new copy of a given point
- * spPointDestroy 			- Free all resources associated with a point
+ * spPointDestroy           - Free all resources associated with a point
  * spPointGetDimension		- A getter of the dimension of a point
  * spPointGetIndex			- A getter of the index of a point
  * spPointGetAxisCoor		- A getter of a given coordinate of the point
@@ -92,7 +92,7 @@ int spPointGetIndex(SPPoint point);
  *
  * @param point - The source point
  * @param axis  - The coordinate of the point which
- * 				  its value will be retreived
+ *                its value will be retreived
  * @assert point!=NULL && axis < dim(point)
  * @return
  * The value of the given coordinate (p_axis will be returned)
