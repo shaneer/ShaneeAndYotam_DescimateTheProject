@@ -33,7 +33,14 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 	int lineNum;
 
 	temp = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
-		if (temp == NULL) {
+	value = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
+	paramName = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
+	res = (SPConfig) malloc(sizeof(*res));
+		if (temp == NULL || value==NULL || paramName==NULL || res==NULL) {
+			free(temp);
+			free(value);
+			free(paramName);
+			free(res);
 			*msg = SP_CONFIG_ALLOC_FAIL;
 			return NULL;
 		}
@@ -41,17 +48,12 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 	if((fp = fopen(filename, "r")) == NULL){
 		*msg = SP_CONFIG_CANNOT_OPEN_FILE;
 		free(temp);
+		free(value);
+		free(paramName);
+		free(res);
 		if (strcmp(filename, "spcbir.config")==0){			//Tells us program is using default config, and it's faulty
 			printf("The default config file spcbir is faulty");
 		}
-		return NULL;
-	}
-
-	res = (SPConfig) malloc(sizeof(*res));
-	if (res == NULL) { 			//Allocation Fails
-		free(temp);
-		fclose(fp);
-		*msg = SP_CONFIG_ALLOC_FAIL;
 		return NULL;
 	}
 
@@ -61,6 +63,8 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 	if (defaults<0){
 		*msg = SP_CONFIG_ALLOC_FAIL;
 		free(temp);
+		free(value);
+		free(paramName);
 		fclose(fp);
 		return NULL;
 	}
@@ -81,15 +85,6 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 			continue;
 		}
 
-		//Creates new string value which holds 'value to be assigned' portion of the line
-		value = (char*) realloc(value, strlen(temp));
-			if (value == NULL) {
-				free(temp);
-				spConfigDestroy(res);
-				*msg = SP_CONFIG_ALLOC_FAIL;
-				fclose(fp);
-				return NULL;
-			}
 		strcpy(value, strchr(temp, '='));
 
 		/*INVALID LINE since not long enough to be definition and we already skipped # and \n
@@ -98,6 +93,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 		if (strlen(temp)<MIN_LENGTH_OF_CONFIG_LINE || value==NULL || strlen(value)<2) {	//value must have at least one char other then newline
 			free(temp);
 			free(value);
+			free(paramName);
 			spConfigDestroy(res);
 			fclose(fp);
 			*msg = SP_CONFIG_INVALID_LINE;
@@ -116,15 +112,6 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 		}
 		value[end+1]='\0';
 
-		paramName = (char*) realloc(paramName, strlen(temp)-strlen(value));
-			if (paramName == NULL) {
-				free(temp);
-				free(value);
-				spConfigDestroy(res);
-				fclose(fp);
-				*msg = SP_CONFIG_ALLOC_FAIL;
-				return NULL;
-			}
 		//Copy param name, until first space or until '='
 		int ind=0;
 		while (!(isspace(temp[ind])||temp[ind]=='=')){
@@ -191,7 +178,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 		}
 		else if (strcmp(paramName, "spExtractionMode")==0) {
 			res->spExtractionMode = readBool(value, filename, lineNum, msg);
-			if (res->spExtractionMode == NULL){
+			if (res->spExtractionMode == -1){
 				terminateDuringParse(res, temp, paramName, value, fp, msg, *msg);
 				return NULL;
 			}
@@ -221,7 +208,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 		}
 		else if (strcmp(paramName, "spMinimalGUI")==0) {
 			res->spMinimalGUI = readBool(value, filename, lineNum, msg);
-			if (res->spMinimalGUI == NULL){
+			if (res->spMinimalGUI == -1){
 				terminateDuringParse(res, temp, paramName, value, fp, msg, *msg);
 				return NULL;
 			}
@@ -266,27 +253,26 @@ void terminateDuringParse(SPConfig res, char* temp, char* paramName, char* value
 	return;
 }
 
-int checkvalid(SPConfig res, char* temp, char* paramName, char* value, FILE *fp,
-		SP_CONFIG_MSG* msg, char* filename, int lineNum){
+int checkvalid(SPConfig res, char* temp, char* paramName, char* value, FILE *fp, SP_CONFIG_MSG* msg, const char* filename, int lineNum){
 	if (res == NULL){
 		return -1;
 	}
-	if ( res->spImagesDirectory==NULL){
+	if (strcmp(res->spImagesDirectory, " ")==0){
 		printParamNotSet(filename, lineNum, "spImagesDirectory");
 		terminateDuringParse(res, temp, paramName, value, fp, msg, SP_CONFIG_MISSING_DIR);
 		return -1;
 	}
-	else if ( res->spImagesPrefix==NULL){
+	else if (strcmp(res->spImagesPrefix, " ")==0){
 		printParamNotSet(filename, lineNum, "spImagesPrefix");
 		terminateDuringParse(res, temp, paramName, value, fp, msg, SP_CONFIG_MISSING_PREFIX);
 		return -1;
 	}
-	else if ( res->spImagesSuffix==NULL){
+	else if (strcmp(res->spImagesSuffix, " ")==0){
 		printParamNotSet(filename, lineNum, "spImagesSuffix");
 		terminateDuringParse(res, temp, paramName, value, fp, msg, SP_CONFIG_MISSING_SUFFIX);
 		return -1;
 	}
-	else if ( res->spNumOfImages==NULL){
+	else if ( res->spNumOfImages==-1){
 		printParamNotSet(filename, lineNum, "spNumOfImages");
 		terminateDuringParse(res, temp, paramName, value, fp, msg, SP_CONFIG_MISSING_NUM_IMAGES);
 		return -1;
@@ -295,29 +281,31 @@ int checkvalid(SPConfig res, char* temp, char* paramName, char* value, FILE *fp,
 }
 
 //PRINTING ERROR MESSAGES TO CONSOLE
-void printConstraintsNotMet(char* filename, int lineNum){
+void printConstraintsNotMet(const char* filename, int lineNum){
 	printf("File: %s\nLine: %d\nMessage: Invalid value - constraint not met",filename, lineNum );
 }
-void printInvalidLine(char* filename, int lineNum){
+void printInvalidLine(const char* filename, int lineNum){
 	printf("File: %s\nLine: %d\nMessage: Invalid configuration line",filename, lineNum );
 }
 //TODO
-void printParamNotSet(char* filename, int lineNum, char* paramName){
+void printParamNotSet(const char* filename, int lineNum, char* paramName){
 	printf("File: %s\nLine: %d\nMessage: Parameter %s is not set",filename, lineNum, paramName );
 }
 
 int setDefaults(SPConfig config){
-	//ALLOC MEM FOR DEFAULTS
+	//ALLOC MEM FOR ALL STRING VALUES
 	config->spPCAFilename = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
-	if (config->spPCAFilename == NULL){
-		spConfigDestroy(config);
-		return -1;
-	}
 	config->spLoggerFilename = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
-	if (config->spLoggerFilename == NULL){
+	config->spImagesSuffix = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
+	config->spImagesPrefix = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
+	config->spImagesDirectory = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
+
+	if (config->spPCAFilename == NULL || config->spLoggerFilename == NULL || config->spImagesSuffix == NULL ||
+	config->spImagesPrefix == NULL || config->spImagesDirectory == NULL ){
 		spConfigDestroy(config);
 		return -1;
 	}
+
 	config->spPCADimension = 20;
 	strcpy(config->spPCAFilename, "pca.yml");
 	config->spNumOfFeatures = 100;
@@ -329,11 +317,17 @@ int setDefaults(SPConfig config){
 	config->spLoggerLevel = 3;
 	strcpy(config->spLoggerFilename, "stdout");
 
+	//SET NON-Default values to NULL or -1
+	config->spNumOfImages=-1;
+	config->spImagesSuffix = " ";
+	config->spImagesPrefix = " ";
+	config->spImagesDirectory = " ";
+
 	return 0;
 	}
 
 //HELPER FUNCTIONS TO LOAD DATA FROM STRING FORN IN CONFIG LINE
-int readInt(char* value, int maxLength, int minLength, char* filename, int lineNum, SP_CONFIG_MSG* msg){
+int readInt(char* value, int maxLength, int minLength, const char* filename, int lineNum, SP_CONFIG_MSG* msg){
 	int num;
 	if (isValidInt(value)){
 		num = atoi(value);
@@ -351,7 +345,7 @@ int readInt(char* value, int maxLength, int minLength, char* filename, int lineN
 	}
 }
 
-char* readStr(char* val, char* filename, int lineNum, SP_CONFIG_MSG* msg){
+char* readStr(char* val, const char* filename, int lineNum, SP_CONFIG_MSG* msg){
 	if (val == NULL){
 		printInvalidLine(filename, lineNum);
 		*msg = SP_CONFIG_INVALID_STRING;
@@ -366,7 +360,7 @@ char* readStr(char* val, char* filename, int lineNum, SP_CONFIG_MSG* msg){
 	}
 }
 
-char* readSuffix(char* val, char* filename, int lineNum, SP_CONFIG_MSG* msg){
+char* readSuffix(char* val, const char* filename, int lineNum, SP_CONFIG_MSG* msg){
 	if (val == NULL){
 		printInvalidLine(filename, lineNum);
 		*msg = SP_CONFIG_INVALID_STRING;
@@ -385,16 +379,16 @@ char* readSuffix(char* val, char* filename, int lineNum, SP_CONFIG_MSG* msg){
 	return NULL;
 }
 
-bool readBool(char* val, char* filename, int lineNum, SP_CONFIG_MSG* msg){				//TODO - can the user define bool as 0/1 does case matter True/true/tRue??
+bool readBool(char* val, const char* filename, int lineNum, SP_CONFIG_MSG* msg){				//TODO - can the user define bool as 0/1 does case matter True/true/tRue??
 	if (val == NULL){
 		printInvalidLine(filename, lineNum);
 		*msg = SP_CONFIG_INVALID_ARGUMENT;
-		return NULL;
+		return -1;
 	}
 	if (!isValidString(val)){
 		printInvalidLine(filename, lineNum);
 		*msg = SP_CONFIG_INVALID_LINE;
-		return NULL;
+		return -1;
 	}
 	if ( strcmp(val,"true")==0 ){
 		return true;
@@ -404,10 +398,10 @@ bool readBool(char* val, char* filename, int lineNum, SP_CONFIG_MSG* msg){				//
 	}
 	printInvalidLine(filename, lineNum);
 	*msg = SP_CONFIG_INVALID_STRING;
-	return NULL;
+	return -1;
 }
 
-SP_SPLIT_METHOD readEnum(char* val, char* filename, int lineNum, SP_CONFIG_MSG* msg){
+SP_SPLIT_METHOD readEnum(char* val, const char* filename, int lineNum, SP_CONFIG_MSG* msg){
 	if (val == NULL){
 		printInvalidLine(filename, lineNum);
 		*msg = SP_CONFIG_INVALID_ARGUMENT;
@@ -460,20 +454,21 @@ bool isValidString(char *str){
    while (*str){
       if (isspace(*str) || (*str)=='#'){
          return false;
-	}
-	else{
+			 }
+			 else{
          ++str;
-   }
-   return true;
+   		}
+	}
+	return true;
 }
 
 bool spConfigIsExtractionMode(const SPConfig config, SP_CONFIG_MSG* msg){
 	assert( msg != NULL );
 	if (config == NULL){
-		msg = SP_CONFIG_INVALID_ARGUMENT;
+		*msg = SP_CONFIG_INVALID_ARGUMENT;
 		return NULL;
 	}
-	msg = SP_CONFIG_SUCCESS;
+	*msg = SP_CONFIG_SUCCESS;
 	if (config->spExtractionMode==1){
 		return true;
 	}
@@ -484,10 +479,10 @@ bool spConfigIsExtractionMode(const SPConfig config, SP_CONFIG_MSG* msg){
 bool spConfigMinimalGui(const SPConfig config, SP_CONFIG_MSG* msg){
 	assert( msg != NULL );
 	if (config == NULL){
-		msg = SP_CONFIG_INVALID_ARGUMENT;
+		*msg = SP_CONFIG_INVALID_ARGUMENT;
 		return NULL;
 	}
-	msg = SP_CONFIG_SUCCESS;
+	*msg = SP_CONFIG_SUCCESS;
 	if (config->spMinimalGUI==1){
 		return true;
 	}
@@ -497,12 +492,12 @@ bool spConfigMinimalGui(const SPConfig config, SP_CONFIG_MSG* msg){
 int spConfigGetNumOfImages(const SPConfig config, SP_CONFIG_MSG* msg){
 	assert( msg != NULL );
 	if (config == NULL){
-		msg = SP_CONFIG_INVALID_ARGUMENT;
-		return NULL;
+		*msg = SP_CONFIG_INVALID_ARGUMENT;
+		return -1;
 	}
 
 	int num = config->spNumOfImages;
-	msg = SP_CONFIG_SUCCESS;
+	*msg = SP_CONFIG_SUCCESS;
 
 	return num;
 }
@@ -510,12 +505,12 @@ int spConfigGetNumOfImages(const SPConfig config, SP_CONFIG_MSG* msg){
 int spConfigGetNumOfFeatures(const SPConfig config, SP_CONFIG_MSG* msg){
 	assert( msg != NULL );
 	if (config == NULL){
-		msg = SP_CONFIG_INVALID_ARGUMENT;
-		return NULL;
+		*msg = SP_CONFIG_INVALID_ARGUMENT;
+		return -1;
 	}
 
 	int num = config->spNumOfFeatures;
-	msg = SP_CONFIG_SUCCESS;
+  *msg = SP_CONFIG_SUCCESS;
 
 	return num;
 }
@@ -524,67 +519,25 @@ int spConfigGetNumOfFeatures(const SPConfig config, SP_CONFIG_MSG* msg){
 int spConfigGetPCADim(const SPConfig config, SP_CONFIG_MSG* msg){
 	assert( msg != NULL );
 	if (config == NULL){
-		msg = SP_CONFIG_INVALID_ARGUMENT;
-		return NULL;
+		*msg = SP_CONFIG_INVALID_ARGUMENT;
+		return -1;
 	}
 
 	int num = config->spPCADimension;
-	msg = SP_CONFIG_SUCCESS;
+	*msg = SP_CONFIG_SUCCESS;
 
 	return num;
 }
 
 //TODO - !
-SP_CONFIG_MSG spConfigGetImagePath(char* imagePath, const SPConfig config,int index){
-	SP_CONFIG_MSG* msg;
-	msg = (SP_CONFIG_MSG*) malloc(sizeof(*msg));
+// SP_CONFIG_MSG spConfigGetImagePath(char* imagePath, const SPConfig config,int index){
+// 	return SP_CONFIG_SUCCESS;
+// }
 
-	//TODO - necessary?
-	if (msg == NULL){
-		return SP_CONFIG_ALLOC_FAIL;
-	}
-	if (config == NULL || imagePath==NULL){
-		*msg = SP_CONFIG_INVALID_ARGUMENT;
-		return *msg;
-	}
-	if(index > spConfigGetNumOfImages(config, msg)){
-		*msg = SP_CONFIG_INDEX_OUT_OF_RANGE;
-		return *msg;
-	}
-
-	//spImagesDirectory = "./images/"
-	//spImagesPrefix = "img"
-	//spImagesSuffix = ".png"
-	//spNumOfImages = 17
-	char* directory = config->spImagesDirectory;
-	char* prefix = config->spImagesPrefix;
-	char* suffix = config->spImagesSuffix;
-	char* indexStr = malloc(MAX_INT_LEN);
-	//TODO ALLOCATE MEMORY
-
-	snprintf(indexStr, MAX_INT_LEN, "%d", index);
-	//CAN index be larger than sizeof() = 4?
-
-	int sizeInMem = sizeof(config->spImagesDirectory)+sizeof(config->spImagesPrefix)+sizeof(indexStr)+10;
-	imagePath = realloc(imagePath, sizeInMem);
-
-	//Check Alloc Fail
-	if (imagePath==NULL || sizeof(imagePath) < sizeInMem-1){
-		*msg = SP_CONFIG_ALLOC_FAIL;
-		return *msg;
-	}
-
-	imagePath = memcpy(imagePath, directory, strlen(directory)+1);
-	imagePath = strncat(imagePath, prefix, strlen(prefix)+1);
-	imagePath = strncat(imagePath, indexStr, strlen(indexStr)+1);
-	imagePath = strncat(imagePath, suffix, strlen(suffix)+1);
-
-	return SP_CONFIG_SUCCESS;
-}
-
-SP_CONFIG_MSG spConfigGetPCAPath(char* pcaPath, const SPConfig config){
-	//TODO
-}
+//SP_CONFIG_MSG spConfigGetPCAPath(char* pcaPath, const SPConfig config){
+//	return SP_CONFIG_SUCCESS;
+//	//TODO
+//}
 
 void spConfigDestroy(SPConfig config){
 	if (config == NULL){
