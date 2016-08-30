@@ -43,7 +43,7 @@
  *                                and returns it
  *   spListGetPrevious		    - Moves the list's iterator to the previous element
  *                                and return it
- *   spListClear		      	- Clears all the data from the list
+ *   spListClear		        - Clears all the data from the list
  */
 
 /** Type for defining the list */
@@ -51,10 +51,10 @@ typedef struct sp_list_t *SPList;
 
 /** Type used for returning error codes from list functions */
 typedef enum sp_list_msg_t {
-	SP_LIST_SUCCESS,
-	SP_LIST_NULL_ARGUMENT,
-	SP_LIST_OUT_OF_MEMORY,
-	SP_LIST_INVALID_CURRENT,
+    SP_LIST_SUCCESS,
+    SP_LIST_NULL_ARGUMENT,
+    SP_LIST_OUT_OF_MEMORY,
+    SP_LIST_INVALID_CURRENT,
 } SP_LIST_MSG;
 
 /**
@@ -62,8 +62,8 @@ typedef enum sp_list_msg_t {
  *
  * This function creates a new empty list.
  * @return
- * 	NULL - If allocations failed.
- * 	A new List in case of success.
+ *  NULL - If allocations failed.
+ *  A new List in case of success.
  */
 SPList spListCreate();
 
@@ -283,12 +283,12 @@ void spListDestroy(SPList list);
  * double minElementValue(SPList list) {
  *   double minVal = -1.0;//Elements in List has non-negative values
  *   if(list==NULL){
- *   	return -1.0;
+ *      return -1.0;
  *   }
  *   SP_LIST_FOREACH(SPListElement, e, list) {
  *     double eVal = spListElementGetValue(e)
  *     if(minVal == -1.0 || eVal<minVal){ //Updates minimum
- *     		minVal = eVal;
+ *          minVal = eVal;
  *     }
  *   }
  *   return minVal;
@@ -301,9 +301,9 @@ void spListDestroy(SPList list);
  * @param list the list to iterate over
  */
 #define SP_LIST_FOREACH(type,iterator,list) \
-	for(type iterator = spListGetFirst(list) ; \
-		iterator ;\
-		iterator = spListGetNext(list))
+    for(type iterator = spListGetFirst(list); \
+        iterator; \
+        iterator = spListGetNext(list))
 
 
 #endif /* SPLIST_H_ */

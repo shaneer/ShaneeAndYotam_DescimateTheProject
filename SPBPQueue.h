@@ -14,11 +14,11 @@ typedef struct sp_bp_queue_t* SPBPQueue;
 
 /** type for error reporting **/
 typedef enum sp_bp_queue_msg_t {
-        SP_BPQUEUE_OUT_OF_MEMORY,
-        SP_BPQUEUE_FULL,
-        SP_BPQUEUE_EMPTY,
-        SP_BPQUEUE_INVALID_ARGUMENT,
-        SP_BPQUEUE_SUCCESS
+    SP_BPQUEUE_OUT_OF_MEMORY,
+    SP_BPQUEUE_FULL,
+    SP_BPQUEUE_EMPTY,
+    SP_BPQUEUE_INVALID_ARGUMENT,
+    SP_BPQUEUE_SUCCESS
 } SP_BPQUEUE_MSG;
 
 /**
