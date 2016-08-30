@@ -74,14 +74,8 @@ typedef struct sp_config_t* SPConfig;
  */
 SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg);
 
-/**
- * TODO
- */
-void terminateDuringParse(SPConfig res, char* temp, char* paramName, char* value, FILE *fp, SP_CONFIG_MSG* msg, SP_CONFIG_MSG print);
-/**
- * TODO
- */
-int checkvalid(SPConfig res, char* temp, char* paramName, char* value, FILE *fp, SP_CONFIG_MSG* msg, const char* filename, int lineNum);
+ // TODO
+int checkvalid(SPConfig res, SP_CONFIG_MSG* msg, const char* filename, int lineNum);
 
 /**
  * PRINT FUNCTIONS since logger is not yet initiialized
@@ -94,8 +88,7 @@ void printParamNotSet(const char* filename, int lineNum, char* paramName);
 /**
  * TODO
  */
-int setDefaults(SPConfig config);
-
+void setDefaults(SPConfig config);
 /**
  * TODO
  */
