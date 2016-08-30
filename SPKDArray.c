@@ -47,8 +47,8 @@ int spKDArrayFindMaxSpreadDim(SPKDArray arr) {
     int coorT = 0;
     double spreadT = 0.0;
     for (int i=0; i<arr->dim; i++) {
-        if ((spPointGetAxisCoor(arr->points[kdArray[i][arr->size-1]],i) - spPointGetAxisCoor(arr->points[kdArray[i][0]],i)) > spreadT) {
-            spreadT = spPointGetAxisCoor(arr->points[kdArray[i][arr->size-1]],i) - spPointGetAxisCoor(arr->points[kdArray[i][0]],i);
+        if ((spPointGetAxisCoor(arr->points[arr->kdArray[i][arr->size-1]],i) - spPointGetAxisCoor(arr->points[arr->kdArray[i][0]],i)) > spreadT) {
+            spreadT = spPointGetAxisCoor(arr->points[arr->kdArray[i][arr->size-1]],i) - spPointGetAxisCoor(arr->points[arr->kdArray[i][0]],i);
             coorT = i;
         }
     }
@@ -237,7 +237,10 @@ SPKDArray *Split(SPKDArray kdArr, int coor) {
     if (!kdArr || coor < 0)
         return NULL;
 
-    int midP = (int)((kdArr->size) / 2.0);
+    int midP = 0;
+    if (kdArr->size > 2)
+        midP = (int)((kdArr->size) / 2.0);
+
     // memory allocation
     SPKDArray *resArray = (SPKDArray *)calloc(2, sizeof(SPKDArray));
     if (!resArray)
