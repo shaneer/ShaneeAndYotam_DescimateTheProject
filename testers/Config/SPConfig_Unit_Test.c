@@ -13,6 +13,7 @@ int main() {
   SP_CONFIG_MSG msg1 = SP_CONFIG_ALLOC_FAIL;
 
   SPConfig check1 = spConfigCreate("configEX1.txt", &msg1);
+  printf("Created successfully\n");
   int numOfImgs = spConfigGetNumOfImages(check1, &msg1);
   printf("\nNum of Images should be 17 and is : %d", numOfImgs );
   bool msgCheck1;
