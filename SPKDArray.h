@@ -31,7 +31,7 @@ SPKDArray Init(SPPoint* arr, int size);
  *  coor - the coordinate to split by
  *
  *  @return
- *  NULL if error occured , otherwise returns two SPKDArray (kdLeft, kdRight).
+ *  NULL if error occured , otherwise returns an array of two SPKDArrays (kdLeft, kdRight).
  */
 SPKDArray* Split(SPKDArray spkdArr, int coor);
 
