@@ -5,25 +5,34 @@
 
 #include "SPPoint.h"
 #include "SPKDArray.h"
-#ifndef SPKDNODE_H_
-#define SPKDNODE_H_
+#include "SPPoint.h"
+#ifndef SPKDTREENNSEARCH_H_
+#define SPKDTREENNSEARCH_H_
 
 
 
 /** Type used for error reporting in SPKDTreeNode*/
-typedef enum SP_TREE_NODE_RESULT_t {
+typedef enum SP_NNSEARCH_RESULT_t {
+	//Messages set during node creation
 	SP_NODE_SUCCESS,
 	SP_NODE_INVALID_ARGUMENT,
 	SP_NODE_ALLOC_FAIL,
-} SP_NODE_MSG;
+	//Messages set during node creation
+	SP_KDTREE_SUCCESS,
+	SP_KDTREE_INVALID_ARGUMENT,
+	SP_KDTREE_ALLOC_FAIL
+	SP_KDTREE_POINT_ALLOC_FAIL
+} SP_NNSEARCH_MSG;
 
 /*
  * A data-structure used to represent a node  in a KD Tree
 */
 typedef struct sp_kd_node_t* SPKDNode;
 
+//TODO
+void spKDTreeNodeDestroy(SPKDTreeNode node);
 /**
- * Creates a new node
+ * Creates a new node TODO
  *
  * @param
  * @return
@@ -32,7 +41,8 @@ typedef struct sp_kd_node_t* SPKDNode;
  *
  *
  */
-SPKDNode spKDTreeNodeCreate();
+SPKDNode spKDTreeNodeCreate(int dimension, int value, SPKDNode* leftNode, SPKDNode* rightNode, SPPoint* data, SP_NNSEARCH_MSG* msg);
+
 
 /**
  * Creates a copy of target node.
@@ -50,16 +60,6 @@ SPKDNode spKDTreeNodeCreate();
 SPKDTreeNode spTreeNodeCopy(SPTreeNode original);
 
 /**
- * Destroys the given node.
- * All memory allocation associated with the node is freed
- *
- * @param node the target node to be be freed.
- *
- * If data is NULL, then nothing is done
- */
-void spKDTreeNodeDestroy(SPKDTreeNode node);
-
-/**
  * Compares two nodes.
  *The function asserts that both nodes are not NULL pointers.
  *
@@ -71,31 +71,23 @@ void spKDTreeNodeDestroy(SPKDTreeNode node);
  * -1 if n2 is larger
  * 0  if they are equal (datawise - not necesarilly same address)
  */
-int spKDTreeNodeCompare(SPKDTreeNode n1, SPKDTreeNode n2);
+//int spKDTreeNodeCompare(SPKDTreeNode n1, SPKDTreeNode n2);
 
 /**
- * 	A setter for TODO
- *  Constraints:
+ * Creates a KD tree
  *
- *  @param node   The target node
- *  @param  TODO
- *  @return
- *  SP_NODE_INVALID_ARGUMENT in case data==NULL || index<0
- *  SP_NODE_ALLOC_FAIL in case memory allocation fails
- *  SP_NODE_SUCCESS otherwise
- */
-SP_NODE_MSG spKDTreeNodeSet(SPTreeNode node, int data);
-
-/**
- * A getter for the TODO of the target node.
+ * @param
+ * @assert
  *
- * @param data The target node
- * @return
- * -1 in case data==NULL or node==NULL
- * otherwise, returns TODO of the target node
+ * NULL in case of memory allocation fails at any stage
+ * @returns the root node of the tree built ( A newly created SPKDTreeNode)
+ *
  */
-int spKDTreeNodeGet(SPTreeNode node);
+SPKDArray spKDBuildTree(SPPoint* pnt, int prevDim, SPKDArray arr, SP_SPLIT_METHOD method, SP_NNSEARCH_MSG* msg);
 
+/*
+TODO
+*/
+void SPKDNNSearch(SPPoint queryPoint, SPKDTreeNode root, SPKDArray arr, SPBPQueue BPQ);
 
-
-#endif // SPKDNODE_H_
+#endif // SPKDTREENNSEARCH_H_
