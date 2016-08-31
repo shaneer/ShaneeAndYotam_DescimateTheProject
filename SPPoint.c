@@ -39,10 +39,11 @@ SPPoint assignMemForNewPoint(int dim) {
 }
 
 SPPoint spPointCreate(double* data, int dim, int index) {
+    int i;
     if (data == NULL || dim <= 0 || index < 0) return NULL;
     SPPoint p = assignMemForNewPoint(dim);
     if (p == NULL) return NULL;
-    for (int i=0; i<dim; i++) p->p_itms[i] = data[i];
+    for (i=0; i<dim; i++) p->p_itms[i] = data[i];
     p->p_dim = dim;
     p->p_index = index;
     return p;
@@ -78,9 +79,10 @@ double spPointGetAxisCoor(SPPoint point, int axis) {
 }
 
 double spPointL2SquaredDistance(SPPoint p, SPPoint q) {
+    int i;
     assert(p != NULL && q != NULL && p->p_dim == q->p_dim);
     double dist = 0.0;
-    for (int i=0; i<p->p_dim; i++) {
+    for (i=0; i<p->p_dim; i++) {
         // dist += pow((p->p_itms[i] - q->p_itms[i]), 2);
         dist += (p->p_itms[i] - q->p_itms[i])*(p->p_itms[i] - q->p_itms[i]);
     }

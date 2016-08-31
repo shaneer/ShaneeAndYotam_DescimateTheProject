@@ -5,11 +5,11 @@
  *      Author: shaneer
  */
 
+#include <stdlib.h>
+#include <assert.h>
 #include "SPBPQueue.h"
 #include "SPListElement.h"
 #include "SPList.h"
-#include <stdlib.h>
-#include <assert.h>
 
 struct sp_bp_queue_t {
     int capacity;

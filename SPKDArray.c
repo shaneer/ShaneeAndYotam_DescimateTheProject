@@ -44,9 +44,9 @@ SPPoint spKDArrayGetPoint(SPKDArray arr, int index) {
 
 int spKDArrayFindMaxSpreadDim(SPKDArray arr) {
     assert(arr!=NULL);
-    int coorT = 0;
+    int coorT = 0, i;
     double spreadT = 0.0;
-    for (int i=0; i<arr->dim; i++) {
+    for (i=0; i<arr->dim; i++) {
         if ((spPointGetAxisCoor(arr->points[arr->kdArray[i][arr->size-1]],i) - spPointGetAxisCoor(arr->points[arr->kdArray[i][0]],i)) > spreadT) {
             spreadT = spPointGetAxisCoor(arr->points[arr->kdArray[i][arr->size-1]],i) - spPointGetAxisCoor(arr->points[arr->kdArray[i][0]],i);
             coorT = i;
@@ -62,11 +62,12 @@ SPPoint *spKDArrayGetPointsArray(SPKDArray spkdArr) {
     if (!spkdArr)
         return NULL;
     SPPoint *cpy = (SPPoint *)calloc(spkdArr->size, sizeof(SPPoint));
-    for (int i = 0; i < spkdArr->size; i++) {
+    int i, j;
+    for (i = 0; i < spkdArr->size; i++) {
         cpy[i] = spPointCopy((spkdArr->points)[i]);
         // check for failure
         if (!cpy[i]) {
-            for (int j = 0; j < i; j++) {
+            for (j = 0; j < i; j++) {
                 spPointDestroy(cpy[j]);
             }
             free(cpy);
@@ -312,7 +313,8 @@ void spKDArrayDestroy(SPKDArray spkdArr) {
     if (!spkdArr) {
         return;
     }
-    for (int i = 0; i < spkdArr->size; i++)
+    int i;
+    for (i = 0; i < spkdArr->size; i++)
         spPointDestroy(spkdArr->points[i]);
     free(spkdArr->points);
     free(*(spkdArr->kdArray));
@@ -325,7 +327,7 @@ void spKDArrayDestroy(SPKDArray spkdArr) {
  *  Prints the SPKDAraay given
  */
 void spKDArrayFullPrint(SPKDArray spkdArr) {
-    char *m1 = "\nSPKDArray\n--------------\n";
+    char *m1 = "--------------\n";
     char *m2 = "- Points:\n";
     char *m3 = "- Size:\t";
     char *m4 = "- Dim:\t";
@@ -335,9 +337,10 @@ void spKDArrayFullPrint(SPKDArray spkdArr) {
     printf("%s%d\n", m3, spkdArr->size);
     printf("%s%d\n", m4, spkdArr->dim);
     printf("%s", m2);
-    for (int i = 0; i < spkdArr->size; i++) {
+    int i, j;
+    for (i = 0; i < spkdArr->size; i++) {
         printf("\t%d\t-\t(", i);
-        for (int j = 0; j < spkdArr->dim; j++) {
+        for (j = 0; j < spkdArr->dim; j++) {
             printf("%.0f", spPointGetAxisCoor((spkdArr->points)[i], j));
             if (j < spkdArr->dim - 1)
                 printf(", ");
@@ -345,9 +348,9 @@ void spKDArrayFullPrint(SPKDArray spkdArr) {
         printf(")\n");
     }
     printf("%s", m5);
-    for (int i = 0; i < spkdArr->dim; i++) {
+    for (i = 0; i < spkdArr->dim; i++) {
         printf("\n\t");
-        for (int j = 0; j < spkdArr->size; j++) {
+        for (j = 0; j < spkdArr->size; j++) {
             printf("%d\t", (spkdArr->kdArray)[i][j]);
         }
     }
