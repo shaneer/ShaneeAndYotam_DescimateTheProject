@@ -4,11 +4,12 @@
  *  Author: Yotam
  */
 
-#include "SPConfig.h"
-#include "SPPoint.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "SPConfig.h"
+#include "SPPoint.h"
+#include "SPImageExtraction.h"
 
 SP_EXTRACTION_MSG spExtractFromImage(SPPoint *feats, int numOfFeatures, int index, const char *filename) {
     // input check
@@ -16,9 +17,11 @@ SP_EXTRACTION_MSG spExtractFromImage(SPPoint *feats, int numOfFeatures, int inde
         return SP_EXTRACTION_INVALID_ARGUMENT;
 
     int i,j,fDim;
-    FILE *fp;
+
     fDim = spPointGetDimension(*feats);
-    if (!fopen(filename, 'w') == NULL) {
+    FILE *fp = fopen(filename, "w");
+
+    if (fp == NULL) {
         return SP_EXTRACTION_FILE_ERROR;
     }
     // Write image index and features number
@@ -28,7 +31,7 @@ SP_EXTRACTION_MSG spExtractFromImage(SPPoint *feats, int numOfFeatures, int inde
     }
     for (i=0; i<numOfFeatures; i++) {
         for (j=0; j<fDim; j++) {
-            if (fprintf(fp, "%.4f ", feats[i][j]) < 0) {
+            if (fprintf(fp, "%.4f ", spPointGetAxisCoor(feats[i], j)) < 0) {
                 fclose(fp);
                 return SP_EXTRACTION_FILE_ERROR;
             }
@@ -39,6 +42,7 @@ SP_EXTRACTION_MSG spExtractFromImage(SPPoint *feats, int numOfFeatures, int inde
     // Finished writing all features
     fclose(fp);
     return SP_EXTRACTION_SUCCESS;
+
 }
 
 SP_EXTRACTION_MSG spExtractFromFiles(const char* filename, SPPoint* arr) {
@@ -46,8 +50,11 @@ SP_EXTRACTION_MSG spExtractFromFiles(const char* filename, SPPoint* arr) {
         return SP_EXTRACTION_INVALID_ARGUMENT;
 
     int i,j,k,index,numOfFeatures,fDim;
-    FILE *fp;
-    if (!fopen(filename, 'r') == NULL) {
+    double* pData;
+    
+    FILE *fp = fopen(filename, "r");
+
+    if (fp == NULL) {
         return SP_EXTRACTION_FILE_ERROR;
     }
     // Read image index and features number
@@ -66,7 +73,7 @@ SP_EXTRACTION_MSG spExtractFromFiles(const char* filename, SPPoint* arr) {
     // Allocation successful
     for (i=0; i<numOfFeatures; i++) {
         for (j=0; j<fDim; j++) {
-            if (fscanf(fp,"%.4f ", &(pData[j])) == 0) {
+            if (fscanf(fp,"%lf ", &(pData[j])) == 0) {
                 free(arr);
                 free(pData);
                 fclose(fp);
