@@ -31,7 +31,7 @@ SP_EXTRACTION_MSG spExtractFromImage(SPPoint *feats, int numOfFeatures, int inde
     }
     for (i=0; i<numOfFeatures; i++) {
         for (j=0; j<fDim; j++) {
-            if (fprintf(fp, "%.4f ", spPointGetAxisCoor(feats[i], j)) < 0) {
+            if (fprintf(fp, "%lf ", spPointGetAxisCoor(feats[i], j)) < 0) {
                 fclose(fp);
                 return SP_EXTRACTION_FILE_ERROR;
             }
@@ -45,39 +45,46 @@ SP_EXTRACTION_MSG spExtractFromImage(SPPoint *feats, int numOfFeatures, int inde
 
 }
 
-SP_EXTRACTION_MSG spExtractFromFiles(const char* filename, SPPoint* arr) {
-    if (!arr || !filename)
-        return SP_EXTRACTION_INVALID_ARGUMENT;
+SPPoint* spExtractFromFiles(const char* featsPath, int* numOfFeatures, SP_EXTRACTION_MSG* msg) {
+    if (!featsPath) {
+        *msg = SP_EXTRACTION_INVALID_ARGUMENT;
+        return NULL;
+    }
 
-    int i,j,k,index,numOfFeatures,fDim;
+    int i,j,k,index,fDim;
     double* pData;
-    
-    FILE *fp = fopen(filename, "r");
+    SPPoint* arr;
+
+    FILE *fp = fopen(featsPath, "r");
 
     if (fp == NULL) {
-        return SP_EXTRACTION_FILE_ERROR;
+        *msg = SP_EXTRACTION_FILE_ERROR;
+        return NULL;
     }
     // Read image index and features number
-    if (fscanf(fp, "%d %d %d\n",&index, &numOfFeatures, &fDim) == 0) {
+    if (fscanf(fp, "%d %d %d\n",&index, numOfFeatures, &fDim) == 0) {
         fclose(fp);
-        return SP_EXTRACTION_FILE_ERROR;
+        *msg = SP_EXTRACTION_FILE_ERROR;
+        return NULL;
     }
-    arr = (SPPoint*)calloc(numOfFeatures,sizeof(SPPoint));
+    arr = (SPPoint*)calloc(*numOfFeatures,sizeof(SPPoint));
     pData = (double*)calloc(fDim,sizeof(double));
     if (!arr || !pData) {
         free(arr);
         free(pData);
         fclose(fp);
-        return SP_EXTRACTION_ALLOC_FAIL;
+        *msg = SP_EXTRACTION_ALLOC_FAIL;
+        return NULL;
     }
     // Allocation successful
-    for (i=0; i<numOfFeatures; i++) {
+    for (i=0; i<*numOfFeatures; i++) {
         for (j=0; j<fDim; j++) {
             if (fscanf(fp,"%lf ", &(pData[j])) == 0) {
                 free(arr);
                 free(pData);
                 fclose(fp);
-                return SP_EXTRACTION_FILE_ERROR;
+                *msg = SP_EXTRACTION_FILE_ERROR;
+                return NULL;
             }
             // Read successful
         }
@@ -89,12 +96,14 @@ SP_EXTRACTION_MSG spExtractFromFiles(const char* filename, SPPoint* arr) {
             free(arr);
             free(pData);
             fclose(fp);
-            return SP_EXTRACTION_ALLOC_FAIL;
+            *msg = SP_EXTRACTION_ALLOC_FAIL;
+            return NULL;
         }
         // Point created successfuly
     }
     // Finished reading
     free(pData);
     fclose(fp);
-    return SP_EXTRACTION_SUCCESS;
+    *msg = SP_EXTRACTION_SUCCESS;
+    return arr;
 }
