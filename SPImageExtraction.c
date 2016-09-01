@@ -31,7 +31,7 @@ SP_EXTRACTION_MSG spExtractFromImage(SPPoint *feats, int numOfFeatures, int inde
     }
     for (i=0; i<numOfFeatures; i++) {
         for (j=0; j<fDim; j++) {
-            if (fprintf(fp, "%.4f ", spPointGetAxisCoor(feats[i], j)) < 0) {
+            if (fprintf(fp, "%lf ", spPointGetAxisCoor(feats[i], j)) < 0) {
                 fclose(fp);
                 return SP_EXTRACTION_FILE_ERROR;
             }
