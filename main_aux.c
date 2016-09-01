@@ -8,7 +8,7 @@
 #include "SPPoint.h"
 
 typedef enum aux_readline_state_t {
-  OK, NO_INPUT, TOO_LONG
+    OK, NO_INPUT, TOO_LONG
 } AUX_READ_STATE;
 
 AUX_READ_STATE getLine(const char *prmpt, char *buff, size_t sz) {
@@ -37,10 +37,30 @@ AUX_READ_STATE getLine(const char *prmpt, char *buff, size_t sz) {
 }
 
 void freeSPPointsArray(SPPoint* arr, int size) {
-  int i;
-  for (i=0;i<size;i++) spPointDestroy(arr[i]);
-  free(arr);
-  return;
+    int i;
+    for (i=0; i<size; i++) spPointDestroy(arr[i]);
+    free(arr);
+    return;
+}
+
+int compare2DInt(const void* a, const void* b) {
+    int* pa = *(int**)a;
+    int* pb = *(int**)b;
+    if (pb[1] != pa[1]) {
+        return (pb[1] - pa[1]);
+    }
+    return (pa[0] - pb[0]);
+}
+
+const char* spcbirGetConfigFilename(int argc, const char* argv[]) {
+    if (argc == 1) {
+        return "spcbir.config";
+    } else if (argc == 3 && strcmp(argv[1],"-c") == 0 && strlen(argv[2]) > 0) {
+        return argv[2];
+    } else {
+        printf("Invalid command line : use -c <config_filename>\n");
+        return NULL;
+    }
 }
 
 #endif
