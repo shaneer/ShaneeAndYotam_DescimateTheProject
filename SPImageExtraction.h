@@ -19,6 +19,6 @@ typedef enum sp_extraction_msg {
 
 SP_EXTRACTION_MSG spExtractFromImage(SPPoint *feats, int numOfFeatures, int index, const char *filename);
 
-SP_EXTRACTION_MSG spExtractFromFiles(const char* filename, SPPoint* arr);
+SPPoint* spExtractFromFiles(const char* featsPath, int* numOfFeatures, SP_EXTRACTION_MSG* msg);
 
 #endif // SPIMAGEEXTRACTION_H_
