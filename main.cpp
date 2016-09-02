@@ -176,7 +176,7 @@ int main(int argc, char const *argv[]) {
                 exit(0);
             }
             // move features to generall array and destroy the temp array
-            for (j=0; j<numOfFeats; j++) {
+            for (j=0; j < numOfFeats; j++) {
                 feats[featsCount] = featsT[j];
                 featsCount++;
             }
@@ -202,11 +202,11 @@ int main(int argc, char const *argv[]) {
             delete proc;
             exit(0);
         }
-        // printf("\t- Allocated memory successfuly\n");
         for (i = 0; i < numOfImages; i++) {
+            conf_msg = spConfigGetFeaturesFilePath(featsPath, conf, i);
             featsT = spExtractFromFiles(featsPath, &numOfFeats, &ext_msg);
             // TODO: Logger
-            if (spConfigGetFeaturesFilePath(featsPath, conf, i) != SP_CONFIG_SUCCESS || ext_msg != SP_EXTRACTION_SUCCESS ||  featsT == NULL) {
+            if (conf_msg != SP_CONFIG_SUCCESS || ext_msg != SP_EXTRACTION_SUCCESS ||  featsT == NULL) {
                 free(featsPath);
                 free(queryPath);
                 free(imgFeatCount_d);
@@ -228,12 +228,11 @@ int main(int argc, char const *argv[]) {
         // TODO: Logger
     }
     printf("2. Finished processing - %d features\n", featsCount);
-    kdarr = Init(feats, featsCount); // no needto to destroy KDArray (handles in tree creation)
-
+    kdarr = Init(feats, featsCount); // no need to to destroy KDArray (handles in tree creation)
     // at this point no neef ro the SPPoint array (feats)
     freeSPPointsArray(feats, numOfFeats);
-
     printf("3. KDArray created\n");
+
     tree = spKDTreeCreate(kdarr, split_method);
     printf("4. KDTree created\n");
 
@@ -246,13 +245,13 @@ int main(int argc, char const *argv[]) {
             featsT = proc->getImageFeatures(queryPath, numOfImages+1, &numOfFeats);
 
             // reset image result counter array
-            for (i=0; i<numOfFeats; i++) {
+            for (i=0; i<numOfImages; i++) {
                 imgFeatCount_p[i][0] = i;
                 imgFeatCount_p[i][1] = 0;
             }
             // count image features per feature
             for (i=0; i<numOfFeats; i++) {
-                bpq = spKDTreeFineKNearestNeighbors(tree, spKNN, featsT[i]);
+                bpq = spKDTreeFindKNearestNeighbors(tree, spKNN, featsT[i]);
                 bpqSize = spBPQueueSize(bpq);
                 for (j=0; j<bpqSize; j++) {
                     el = spBPQueuePeek(bpq);
@@ -266,6 +265,7 @@ int main(int argc, char const *argv[]) {
             freeSPPointsArray(featsT, numOfFeats); // free the query image features array
 
             printf("5-b. Calculating %d best similar images\n", spSimIm);
+
             // sort results to get best images
             qsort(imgFeatCount_p, numOfImages, sizeof(int*), compare2DInt);
 

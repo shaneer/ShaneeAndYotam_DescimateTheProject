@@ -63,4 +63,16 @@ const char* spcbirGetConfigFilename(int argc, const char* argv[]) {
     }
 }
 
+void spcbirPrintResultArray(int** imgFeatCount_p, int numOfImages, const char* filepath) {
+  FILE* fp = fopen(filepath, "w");
+  int i;
+  for (i=0;i<numOfImages;i++) {
+    fprintf(fp, "%d - %d (%d)\t", i, imgFeatCount_p[i][0], imgFeatCount_p[i][1]);
+    if ((i+1)%5 == 0) {
+      fprintf(fp, "\n");
+    }
+  }
+  fclose(fp);
+}
+
 #endif

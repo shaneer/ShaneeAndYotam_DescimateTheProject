@@ -46,6 +46,11 @@ int spKDArrayFindMaxSpreadDim(SPKDArray arr);
 SPPoint spKDArrayGetPoint(SPKDArray arr, int index);
 
 /*
+ *  Returns the most-left (hight value) point in the array at the given dim
+ */
+double spKDArrayGetHighestPointValueInDim(SPKDArray arr, int dim);
+
+/*
  *  Getter for the image-index at kdArr[i,j].
  */
 int spKDArrayGetIndexInArray(SPKDArray spkdArr, int i, int j);
@@ -68,6 +73,6 @@ void spKDArrayDestroy(SPKDArray spkdArr);
 /*
  *  Fully print the array
  */
-void spKDArrayFullPrint(SPKDArray spkdArr);
+void spKDArrayFullPrint(SPKDArray spkdArr, const char* filepath);
 
 #endif // SPKDRAAY_H_

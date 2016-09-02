@@ -42,6 +42,12 @@ SPPoint spKDArrayGetPoint(SPKDArray arr, int index) {
     return arr->points[index];
 }
 
+double spKDArrayGetHighestPointValueInDim(SPKDArray arr, int dim) {
+    assert(arr != NULL && index < arr->dim);
+    int index = arr->kdArray[dim][arr->size-1];
+    return spPointGetAxisCoor(arr->points[index], dim);
+}
+
 int spKDArrayFindMaxSpreadDim(SPKDArray arr) {
     assert(arr!=NULL);
     int coorT = 0, i;
@@ -233,7 +239,7 @@ void recreateSortedKDArrayMatrixes(SPKDArray kdArr, SPKDArray leftArr, SPKDArray
     }
 }
 
-SPKDArray *Split(SPKDArray kdArr, int coor) {
+SPKDArray* Split(SPKDArray kdArr, int coor) {
     // check correct input
     if (!kdArr || coor < 0)
         return NULL;
@@ -259,12 +265,12 @@ SPKDArray *Split(SPKDArray kdArr, int coor) {
     leftArr->dim = kdArr->dim;                                         // left
     rightArr->size = (kdArr->size) - (midP + 1);                       // right
     rightArr->dim = kdArr->dim;                                        // right
-    leftArr->points = (SPPoint *)calloc(leftArr->size, sizeof(SPPoint));     // left
-    leftArr->kdArray = (int **)calloc(leftArr->dim, sizeof(int *));     // left
-    int *kdArrayVL = (int *)calloc((leftArr->size) * (leftArr->dim), sizeof(int));     // left
-    rightArr->points = (SPPoint *)calloc(rightArr->size, sizeof(SPPoint));     // right
-    rightArr->kdArray = (int **)calloc(rightArr->dim, sizeof(int *));     // right
-    int *kdArrayVR = (int *)calloc((rightArr->size) * (rightArr->dim), sizeof(int));     // right
+    leftArr->points = (SPPoint*)calloc(leftArr->size, sizeof(SPPoint));     // left
+    leftArr->kdArray = (int**)calloc(leftArr->dim, sizeof(int *));     // left
+    int *kdArrayVL = (int*)calloc((leftArr->size) * (leftArr->dim), sizeof(int));     // left
+    rightArr->points = (SPPoint*)calloc(rightArr->size, sizeof(SPPoint));     // right
+    rightArr->kdArray = (int**)calloc(rightArr->dim, sizeof(int *));     // right
+    int *kdArrayVR = (int*)calloc((rightArr->size) * (rightArr->dim), sizeof(int));     // right
     // general allocation
     int *xArr = (int *)calloc(kdArr->size, sizeof(int));     // freed
     int *mapL = (int *)calloc(kdArr->size, sizeof(int));     // freed
@@ -326,34 +332,36 @@ void spKDArrayDestroy(SPKDArray spkdArr) {
 /*
  *  Prints the SPKDAraay given
  */
-void spKDArrayFullPrint(SPKDArray spkdArr) {
+void spKDArrayFullPrint(SPKDArray spkdArr, const char* filepath) {
+    FILE* fp = fopen(filepath, "w");
     char *m1 = "--------------\n";
     char *m2 = "- Points:\n";
     char *m3 = "- Size:\t";
     char *m4 = "- Dim:\t";
     char *m5 = "- Matrix:";
 
-    printf("%s", m1);
-    printf("%s%d\n", m3, spkdArr->size);
-    printf("%s%d\n", m4, spkdArr->dim);
-    printf("%s", m2);
+    fprintf(fp, "%s", m1);
+    fprintf(fp, "%s%d\n", m3, spkdArr->size);
+    fprintf(fp, "%s%d\n", m4, spkdArr->dim);
+    fprintf(fp, "%s", m2);
     int i, j;
     for (i = 0; i < spkdArr->size; i++) {
-        printf("\t%d\t-\t(", i);
+        fprintf(fp, "\t%d\t-\t(", i);
         for (j = 0; j < spkdArr->dim; j++) {
-            printf("%.0f", spPointGetAxisCoor((spkdArr->points)[i], j));
+            fprintf(fp, "%.0f", spPointGetAxisCoor((spkdArr->points)[i], j));
             if (j < spkdArr->dim - 1)
-                printf(", ");
+                fprintf(fp, ", ");
         }
-        printf(")\n");
+        fprintf(fp, ")\n");
     }
-    printf("%s", m5);
+    fprintf(fp, "%s", m5);
     for (i = 0; i < spkdArr->dim; i++) {
-        printf("\n\t");
+        fprintf(fp, "\n\t");
         for (j = 0; j < spkdArr->size; j++) {
-            printf("%d\t", (spkdArr->kdArray)[i][j]);
+            fprintf(fp, "%d\t", (spkdArr->kdArray)[i][j]);
         }
     }
-    printf("\n\n");
+    fprintf(fp, "\n\n");
+    fclose(fp);
     return;
 }
