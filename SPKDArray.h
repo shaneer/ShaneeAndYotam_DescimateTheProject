@@ -65,4 +65,9 @@ int spKDArrayGetSize(SPKDArray spkdArr);
  */
 void spKDArrayDestroy(SPKDArray spkdArr);
 
+/*
+ *  Fully print the array
+ */
+void spKDArrayFullPrint(SPKDArray spkdArr);
+
 #endif // SPKDRAAY_H_

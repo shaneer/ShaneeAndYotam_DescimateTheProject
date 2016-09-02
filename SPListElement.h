@@ -23,7 +23,7 @@
  *	spListElementSetIndex  - Sets a new index to the target element
  *  spListElementGetIndex  - Gets a the index of the target  element
  *  spListElementSetValue  - Sets a new value to the target element.
- *  spLostElementGetValue  - Gets a the value of the target element
+ *  spListElementGetValue  - Gets a the value of the target element
  */
 
 /** Type used for error reporting in SPListElement*/
