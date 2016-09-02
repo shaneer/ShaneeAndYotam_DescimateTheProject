@@ -16,7 +16,8 @@
 ## Yotam
 - [x] KDArray
 - [x] Load / Save (further testing required)
-- [ ] Main Loop
+- [x] Main Loop
+- [ ] MinimalGui Support
 - [ ] Logger integration
 
 ## Notes
