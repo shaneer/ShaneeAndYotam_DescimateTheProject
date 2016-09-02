@@ -2,14 +2,11 @@
     KDTree Header File
     Author: Shanee
 */
-
 #include "SPPoint.h"
 #include "SPKDArray.h"
 #include "SPPoint.h"
 #ifndef SPKDTREENNSEARCH_H_
 #define SPKDTREENNSEARCH_H_
-
-
 
 /** Type used for error reporting in SPKDTreeNode*/
 typedef enum SP_NNSEARCH_RESULT_t {
@@ -42,7 +39,6 @@ void spKDTreeNodeDestroy(SPKDTreeNode node);
  *
  */
 SPKDNode spKDTreeNodeCreate(int dimension, int value, SPKDNode* leftNode, SPKDNode* rightNode, SPPoint* data, SP_NNSEARCH_MSG* msg);
-
 
 /**
  * Creates a copy of target node.

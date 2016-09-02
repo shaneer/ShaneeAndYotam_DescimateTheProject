@@ -156,7 +156,7 @@ SPKDNode spKDBuildTree(SPPoint* pnt, int prevDim, SPKDArray arr, SP_SPLIT_METHOD
     return node;
 }
 
-void SPKDNNSearch(SPPoint queryPoint, SPKDTreeNode root, SPKDArray arr, SPBPQueue BPQ);
+void SPKDNNSearch(SPPoint queryPoint, SPKDTreeNode root, SPKDArray arr, SPBPQueue BPQ){
   assert(root != NULL);
   assert(BPQ != NULL);
   int index;
