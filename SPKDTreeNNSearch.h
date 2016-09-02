@@ -7,6 +7,7 @@
 #include "SPPoint.h"
 #ifndef SPKDTREENNSEARCH_H_
 #define SPKDTREENNSEARCH_H_
+#define INVALID -1
 
 /** Type used for error reporting in SPKDTreeNode*/
 typedef enum SP_NNSEARCH_RESULT_t {
@@ -18,7 +19,13 @@ typedef enum SP_NNSEARCH_RESULT_t {
 	SP_KDTREE_SUCCESS,
 	SP_KDTREE_INVALID_ARGUMENT,
 	SP_KDTREE_ALLOC_FAIL
-	SP_KDTREE_POINT_ALLOC_FAIL
+	SP_KDTREE_GETPOINT_FAIL
+	//Failure building queue
+	SP_KDTREE_QUEUE_FAILURE
+	//During Search:
+	SP_SEARCH_INVALID_ARGUMENT,
+	SP_SEARCH_SUCCESS
+	//
 } SP_NNSEARCH_MSG;
 
 /*
@@ -41,35 +48,6 @@ void spKDTreeNodeDestroy(SPKDTreeNode node);
 SPKDNode spKDTreeNodeCreate(int dimension, int value, SPKDNode* leftNode, SPKDNode* rightNode, SPPoint* data, SP_NNSEARCH_MSG* msg);
 
 /**
- * Creates a copy of target node.
- *
- * The new copy will contain the same TODO as original
- *
- * The comparison is made based on the following relation:
- *
- * @param data - The target node which will be copied
- * @return
- * NULL if a NULL was sent or memory allocation failed.
- * Otherwise the address of the new copy
- *
- **/
-SPKDTreeNode spTreeNodeCopy(SPTreeNode original);
-
-/**
- * Compares two nodes.
- *The function asserts that both nodes are not NULL pointers.
- *
- * @param n1 The first node to be compared
- * @param n2 The second node to be compared with
- * @assert e1!=NULL AND e2!=NULL
- * @return
- * 1  if n1 is bigger
- * -1 if n2 is larger
- * 0  if they are equal (datawise - not necesarilly same address)
- */
-//int spKDTreeNodeCompare(SPKDTreeNode n1, SPKDTreeNode n2);
-
-/**
  * Creates a KD tree
  *
  * @param
@@ -84,6 +62,6 @@ SPKDArray spKDBuildTree(SPPoint* pnt, int prevDim, SPKDArray arr, SP_SPLIT_METHO
 /*
 TODO
 */
-void SPKDNNSearch(SPPoint queryPoint, SPKDTreeNode root, SPKDArray arr, SPBPQueue BPQ);
+SPBPQueue SPSearch(SPPoint queryPoint, SPKDTreeNode root, int maxSize, SP_NNSEARCH_MSG* msg)
 
 #endif // SPKDTREENNSEARCH_H_
