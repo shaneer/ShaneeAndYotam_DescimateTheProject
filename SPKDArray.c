@@ -43,7 +43,7 @@ SPPoint spKDArrayGetPoint(SPKDArray arr, int index) {
 }
 
 double spKDArrayGetHighestPointValueInDim(SPKDArray arr, int dim) {
-    assert(arr != NULL && index < arr->dim);
+    assert(arr != NULL && dim < arr->dim);
     int index = arr->kdArray[dim][arr->size-1];
     return spPointGetAxisCoor(arr->points[index], dim);
 }
