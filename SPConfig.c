@@ -24,122 +24,6 @@ struct sp_config_t{
 	char* spLoggerFilename;
 };
 
-//FUNCTION DECLARATIONS
-bool loadData(SPConfig res, char* paramName, char* value, const char* filename, int lineNum, SP_CONFIG_MSG* msg);
-
-SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
-	assert( msg != NULL );
-	FILE *fp;
-	SPConfig res;
-	char* temp;
-	char* value;
-	char* paramName;
-	int lineNum;
-	bool successfulLoad;
-
-
-	res = (SPConfig) malloc(sizeof(*res));
-	if (res == NULL) {
-		return NULL;
-	}
-
-	temp = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
-	value = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
-	res->spPCAFilename = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
-	res->spLoggerFilename = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
-	res->spImagesSuffix = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
-	res->spImagesPrefix = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
-	res->spImagesDirectory = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
-
-		if (temp == NULL || value==NULL ||  !res->spPCAFilename ||
-	!res->spPCAFilename || !res->spLoggerFilename || !res->spImagesSuffix || !res->spImagesPrefix || !res->spImagesDirectory) {
-			free(temp);
-			free(value);
-			spConfigDestroy(res);
-			*msg = SP_CONFIG_ALLOC_FAIL;
-			return NULL;
-		}
-// all allocs ok
-
-printf("ALLOC OK \n");
-	if((fp = fopen(filename, "r")) == NULL){
-		*msg = SP_CONFIG_CANNOT_OPEN_FILE;
-		free(temp);
-		free(value);
-		spConfigDestroy(res);
-		if (strcmp(filename, "spcbir.config")==0){			//Tells us program is using default config, and it's faulty
-			printf("The default config file spcbir is faulty");
-		}
-		return NULL;
-	}
-	//We have now succesfully allocated memory for our config struct res, opened our config_file
-	// and allocated memory for temp. We begin by setting all the defaults.
-	setDefaults(res);
-
-	//We now have a config object with all defaults set, we initialize line counter and begin to review file.
-	lineNum = 0;
-	//ASSUME success
-	//*msg = SP_CONFIG_SUCCESS;
-
-successfulLoad = true;
-printf("FileOpenedSuccessfuly\n");
-	while(fgets(temp, CONFIG_LINE_MAX_SIZE, fp) != NULL && feof(fp) == 0  && successfulLoad) {
-				lineNum++;															//Count starts at 1
-
-				//Copys param name skipping preceeding whitespace, until first space or until '='
-				int ind=0;
-				paramName = temp;
-				while (isspace(*paramName)){
-					++paramName;
-					++ind;
-				}
-				if (*paramName == '#'||*paramName =='\n'||*paramName =='\0') {		//Skips comments and 'newline's
-					continue;
-				}
-				while (!(isspace(paramName[ind])||paramName[ind]=='=')){
-					ind++;
-				}
-				temp[ind]='\0';
-
-				strcpy(value, strchr(temp, '='));
-				//We now have temp which we will use to discover which param to use, and value which starts at =
-				++value;
-				while (isspace(*value)){
-					++value;
-				}
-				//Remove spaces at end
-				int end = strlen(value)-1;
-				while (isspace(value[end])){
-					--end;
-				}
-				value[end+1]='\0';
-
-
-				//FUNCTION THAT LOADS DATA INTO PARAM NAMES
-				successfulLoad = loadData(res, paramName, value, filename, lineNum, msg);
- 		}//END OF WHILE LOOP
-
- int check = checkvalid(res, msg, filename, lineNum);
- if (!*msg == SP_CONFIG_SUCCESS || check<0){
-	 spConfigDestroy(res);
-	 res = NULL;
- }
- printf("ALL insrt ok\n");
-	free(temp);
-	free(value);
-	fclose(fp);
-	return res;
-}
-
-//void terminateDuringParse(SPConfig res, char* temp, char* paramName, char* value, FILE *fp, SP_CONFIG_MSG* msg, SP_CONFIG_MSG out){
-//	spConfigDestroy(res);
-//	free(temp);
-//	free(value);
-//	fclose(fp);
-//	*msg = out;
-//	return;
-//}
-
 //Check the paramNames to see if the name fits any and if so assign proper value
 bool loadData(SPConfig res, char* paramName, char* value, const char* filename, int lineNum, SP_CONFIG_MSG* msg){
 	//TEMPORARY VALUE FOR VALIDITY CHECKS
@@ -241,8 +125,7 @@ bool loadData(SPConfig res, char* paramName, char* value, const char* filename, 
 	return true;
 }
 
-
-int checkvalid(SPConfig res, SP_CONFIG_MSG* msg, const char* filename, int lineNum){
+int checkValid(SPConfig res, SP_CONFIG_MSG* msg, const char* filename, int lineNum){
 	printf(">> >> inside checkvalid\n");
 	if (res == NULL){
 		return -1;
@@ -274,6 +157,108 @@ int checkvalid(SPConfig res, SP_CONFIG_MSG* msg, const char* filename, int lineN
 	return 0;
 }
 
+SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
+	assert( msg != NULL );
+	FILE *fp;
+	SPConfig res;
+	char* temp;
+	char* currLine;
+	char* value;
+	char* paramName;
+	int lineNum;
+	bool successfulLoad;
+
+
+	res = (SPConfig) malloc(sizeof(*res));
+	if (res == NULL) {
+		return NULL;
+	}
+
+	temp = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
+	value = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
+	paramName = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
+	res->spPCAFilename = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
+	res->spLoggerFilename = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
+	res->spImagesSuffix = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
+	res->spImagesPrefix = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
+	res->spImagesDirectory = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
+
+		if (temp == NULL || value==NULL || paramName==NULL ||  !res->spPCAFilename || !res->spLoggerFilename
+			|| !res->spImagesSuffix || !res->spImagesPrefix || !res->spImagesDirectory) {
+			free(temp);
+			free(value);
+			free(paramName);
+			spConfigDestroy(res);
+			*msg = SP_CONFIG_ALLOC_FAIL;
+			return NULL;
+		}//All memory allocations were succesfful
+
+	if((fp = fopen(filename, "r")) == NULL){
+		*msg = SP_CONFIG_CANNOT_OPEN_FILE;
+		free(temp);
+		free(value);
+		free(paramName);
+		spConfigDestroy(res);
+		if (strcmp(filename, "spcbir.config")==0){			//Tells us program is using default config, and it's faulty
+			printf("The default config file spcbir is faulty");
+		}
+		return NULL;
+	}
+	//We have now succesfully allocated memory for our config struct res, opened our config_file
+	// and allocated memory for temp. We begin by setting all the defaults.
+	setDefaults(res);
+	//We now have a config object with all defaults set, we initialize line counter and begin to review file.
+	lineNum = 0;
+	//ASSUME success
+	//*msg = SP_CONFIG_SUCCESS;
+	successfulLoad = true;
+	while(fgets(temp, CONFIG_LINE_MAX_SIZE, fp) != NULL && feof(fp) == 0  && successfulLoad) {
+				lineNum++;															//Count starts at 1
+				//Skips over spaces,  comments and newlines
+				currLine = temp;
+				int ind=0;
+				while (isspace(*currLine)){
+					++currLine;
+					++ind;
+				}
+				if (*currLine == '#'||*currLine =='\n'||*currLine =='\0') {		//Skips comments 'newline's and emptylines
+					continue;
+				}
+				//Copys param name skipping preceeding whitespace, until first space or until '='
+				while (!(isspace(temp[ind])||temp[ind]=='=')){
+						paramName[ind]=temp[ind];
+						ind++;
+				}
+				paramName[ind]='\0';
+
+				strcpy(value, strchr(currLine, '='));
+				//We now have temp which we will use to discover which param to use, and value which starts at =
+				++value;
+				while (isspace(*value)){
+					++value;
+				}
+				//Remove spaces at end
+				int end = strlen(value)-1;
+				while (isspace(value[end])){
+					--end;
+				}
+				value[end+1]='\0';
+				//FUNCTION THAT LOADS DATA INTO PARAM NAMES
+				successfulLoad = loadData(res, paramName, value, filename, lineNum, msg);
+ 		}//END OF WHILE LOOP
+ int check = checkValid(res, msg, filename, lineNum);
+ if (!*msg == SP_CONFIG_SUCCESS || check<0){
+	 spConfigDestroy(res);
+	 res = NULL;
+ }
+	free(temp);
+	free(value);
+	free(paramName);
+	fclose(fp);
+	return res;
+}
+
+
 //PRINTING ERROR MESSAGES TO CONSOLE
 void printConstraintsNotMet(const char* filename, int lineNum){
 	printf("File: %s\nLine: %d\nMessage: Invalid value - constraint not met",filename, lineNum );
@@ -286,6 +271,7 @@ void printParamNotSet(const char* filename, int lineNum, char* paramName){
 	printf("File: %s\nLine: %d\nMessage: Parameter %s is not set",filename, lineNum, paramName );
 }
 
+//HELPER FUNCTIONS TO LOAD DATA FROM STRING FORN IN CONFIG LINE
 void setDefaults(SPConfig config){
 	//ALLOC MEM FOR ALL STRING VALUES
 	// config->spPCAFilename = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
@@ -320,7 +306,6 @@ void setDefaults(SPConfig config){
 	//return 0;
 	}
 
-//HELPER FUNCTIONS TO LOAD DATA FROM STRING FORN IN CONFIG LINE
 int readInt(char* value, int maxLength, int minLength, const char* filename, int lineNum, SP_CONFIG_MSG* msg){
 	int num;
 	if (isValidInt(value)){
@@ -456,6 +441,8 @@ bool isValidString(char *str){
 	return true;
 }
 
+//GETTERS FOR FIELDS OF CONFIG
+
 bool spConfigIsExtractionMode(const SPConfig config, SP_CONFIG_MSG* msg){
 	assert( msg != NULL );
 	if (config == NULL){
@@ -468,7 +455,6 @@ bool spConfigIsExtractionMode(const SPConfig config, SP_CONFIG_MSG* msg){
 	}
 	else return false;
 }
-
 
 bool spConfigMinimalGui(const SPConfig config, SP_CONFIG_MSG* msg){
 	assert( msg != NULL );
@@ -509,7 +495,6 @@ int spConfigGetNumOfFeatures(const SPConfig config, SP_CONFIG_MSG* msg){
 	return num;
 }
 
-
 int spConfigGetPCADim(const SPConfig config, SP_CONFIG_MSG* msg){
 	assert( msg != NULL );
 	if (config == NULL){
@@ -523,36 +508,28 @@ int spConfigGetPCADim(const SPConfig config, SP_CONFIG_MSG* msg){
 	return num;
 }
 
+/*
 //TODO - !
-// SP_CONFIG_MSG spConfigGetImagePath(char* imagePath, const SPConfig config,int index){
-// 	return SP_CONFIG_SUCCESS;
-// }
+SP_CONFIG_MSG spConfigGetImagePath(char* imagePath, const SPConfig config,int index){
+return SP_CONFIG_SUCCESS;
+ }
 
-//SP_CONFIG_MSG spConfigGetPCAPath(char* pcaPath, const SPConfig config){
-//	return SP_CONFIG_SUCCESS;
-//	//TODO
-//}
+SP_CONFIG_MSG spConfigGetPCAPath(char* pcaPath, const SPConfig config){
+return SP_CONFIG_SUCCESS;
+//TODO
+}
+*/
 
 void spConfigDestroy(SPConfig config){
-	if (config == NULL){
+	if (!config){
 		return;
 	}
 	free(config->spImagesDirectory);
 	free(config->spImagesPrefix);
 	free(config->spImagesSuffix);
 	free(config->spPCAFilename);
-	/*numOfImages is int
-	*spPCADimension is int
-	*spNumOfFeatures is int
-	*spExtractionMode is bool and so Integer value - freed automatically
-	*spNumOfSimilarImages is int
-	*free(config->spKDTreeSplitMethod);
-	*spKNN is int
-	*spMinimalGUI is bool and so Integer value - freed automatically
-	*spLoggerLevel is int
-	*
-	*/
 	free(config->spLoggerFilename);
+	//All other members are Integer values (int, bool, enum) and do not require the use of free()
 	free(config);
 	return;
 }
