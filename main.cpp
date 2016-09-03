@@ -25,16 +25,16 @@ using namespace sp;
 
 int main(int argc, char const *argv[]) {
     const char* filename, *queryMsg = "Please enter an image path:\n";
-    int i, j, numOfFeats, featsCount = 0, numOfImages, queryCount = 0, spKNN, spSimIm, bpqSize, imIndexT;
+    int i, j, numOfFeats, featsCount = 0, numOfImages, queryCount = 0, spKNN, spSimIm;
     char* imagePath, *featsPath, *loggerPath, *queryPath = NULL;
     ImageProc* proc = NULL;
+    SPConfig conf;
     SPPoint* featsT, *feats;
     SPKDArray kdarr;
     SPKDTreeNode tree;
     SPBPQueue bpq;
-    SPListElement el;
     int** imgFeatCount_p, *imgFeatCount_d;
-    bool extraction_mode, flag = false;
+    bool extraction_mode, sanity = true;
     SP_SPLIT_METHOD split_method;
     SP_LOGGER_LEVEL loggerLevel;
     SP_EXTRACTION_MSG ext_msg;
@@ -43,60 +43,29 @@ int main(int argc, char const *argv[]) {
 
     // get filename from argv[2] (or use default)
     filename = spcbirGetConfigFilename(argc, argv);
-    if (!filename) exit(0);
+    if (!filename) {
+        // TODO: Error
+        exit(0);
+    }
 
-    SPConfig conf = spConfigCreate(filename, &conf_msg);
-    // TODO: Logger
-    if (conf_msg == SP_CONFIG_CANNOT_OPEN_FILE) {
-        if (strcmp(filename, "spcbir.config") != 0) {
-            // filename entered
-            printf("The configuration file %s couldn’t be open\n", filename);
-        } else {
-            // default file
-            printf("The default configuration file spcbir.config couldn’t be open\n");
-        }
+    conf = spcbirOpenConfigFile(filename);
+    if (!conf) {
+        // TODO: Error
         exit(0);
     }
 
     // get attributes from config file for program use
-    numOfImages = spConfigGetNumOfImages(conf, &conf_msg);
+    conf_msg = spcbirGetValuesFromConfig(conf, &numOfImages, &numOfFeats, &spKNN, &spSimIm, &extraction_mode, &split_method, &loggerPath, &loggerLevel);
     if (conf_msg != SP_CONFIG_SUCCESS) {
-        flag = true;
-    }
-    numOfFeats = spConfigGetNumOfFeatures(conf, &conf_msg);
-    if (conf_msg != SP_CONFIG_SUCCESS) {
-        flag = true;
-    }
-    spKNN = spConfigGetKNN(conf, &conf_msg);
-    if (conf_msg != SP_CONFIG_SUCCESS) {
-        flag = true;
-    }
-    spSimIm = spConfigGetNumOfSimilarImages(conf, &conf_msg);
-    if (conf_msg != SP_CONFIG_SUCCESS) {
-        flag = true;
-    }
-    extraction_mode = spConfigIsExtractionMode(conf, &conf_msg);
-    if (conf_msg != SP_CONFIG_SUCCESS) {
-        flag = true;
-    }
-    split_method = spConfigGetSplitMethod(conf, &conf_msg);
-    if (conf_msg != SP_CONFIG_SUCCESS) {
-        flag = true;
-    }
-    loggerPath = spConfigGetLoggerFilename(conf, &conf_msg);
-    if (conf_msg != SP_CONFIG_SUCCESS) {
-        flag = true;
-    }
-    loggerLevel = spConfigGetLoggerLevel(conf, &conf_msg);
-    if (conf_msg != SP_CONFIG_SUCCESS) {
-        flag = true;
+        // TODO: Error
+        spConfigDestroy(conf);
+        exit(0);
     }
     log_msg = spLoggerCreate(loggerPath, loggerLevel);
     if (log_msg != SP_LOGGER_SUCCESS) {
-        flag = true;
-    }
-    if (flag) {
-        // TODO: Logger / Error
+        // TODO: Error
+        spConfigDestroy(conf);
+        exit(0);
     }
     // Logger created path can be freed
     free(loggerPath);
@@ -108,13 +77,13 @@ int main(int argc, char const *argv[]) {
     queryPath = (char*)calloc(CONFIG_LINE_MAX_SIZE+1, sizeof(char));
     imgFeatCount_p = (int**)calloc(numOfImages, sizeof(int*));
     imgFeatCount_d = (int*)calloc(2*numOfImages, sizeof(int));
+    imagePath = (char*)malloc(1+CONFIG_LINE_MAX_SIZE*4); // create a big enough buffer
+    featsPath = (char*)malloc(1+CONFIG_LINE_MAX_SIZE*4); // create a big enough buffer
     proc = new ImageProc(conf); // creat ImageProc ovject
-    if (imgFeatCount_d == NULL || imgFeatCount_p == NULL || feats == NULL || queryPath == NULL) {
+    if (featsPath == NULL || imagePath == NULL || proc == NULL || imgFeatCount_d == NULL || imgFeatCount_p == NULL || feats == NULL || queryPath == NULL) {
         // TODO: Logger / Error
         freeSPPointsArray(feats, numOfFeats);
-        free(queryPath);
-        free(imgFeatCount_d);
-        free(imgFeatCount_p);
+        simpleFree(queryPath, imgFeatCount_d, imgFeatCount_p, imagePath, featsPath);
         spConfigDestroy(conf);
         spLoggerDestroy();
         delete proc;
@@ -129,50 +98,26 @@ int main(int argc, char const *argv[]) {
     if (extraction_mode) {
         // Extract mode
         printf("1-a. Extraction mode\n");
-        imagePath = (char*)malloc(1+CONFIG_LINE_MAX_SIZE*4); // create a big enough buffer
-        featsPath = (char*)malloc(1+CONFIG_LINE_MAX_SIZE*4); // create a big enough buffer
-
-        if (!proc || !imagePath || !featsPath) {
-            // TODO: Logger
-            free(imagePath);
-            free(featsPath);
-            free(imgFeatCount_d);
-            free(imgFeatCount_p);
-            freeSPPointsArray(feats, numOfFeats);
-            free(queryPath);
-            delete proc;
-            spConfigDestroy(conf);
-            spLoggerDestroy();
-            exit(0);
-        }
         // go over all pictures and store data in file and in the feats array
         for (i = 0; i < numOfImages; i++) {
-            // TODO: Logger
             if (spConfigGetFeaturesFilePath(featsPath, conf, i) != SP_CONFIG_SUCCESS || spConfigGetImagePath(imagePath, conf, i) != SP_CONFIG_SUCCESS) {
-                free(imagePath);
-                free(featsPath);
-                free(queryPath);
-                free(imgFeatCount_d);
-                free(imgFeatCount_p);
-                delete proc;
+                // TODO: Logger
+                freeSPPointsArray(feats, numOfFeats);
+                simpleFree(queryPath, imgFeatCount_d, imgFeatCount_p, imagePath, featsPath);
                 spConfigDestroy(conf);
                 spLoggerDestroy();
-                freeSPPointsArray(feats, numOfFeats);
+                delete proc;
                 exit(0);
             }
             featsT = proc->getImageFeatures(imagePath, i, &numOfFeats); // get features for image
             ext_msg = spExtractFromImage(featsT, numOfFeats, i, featsPath); // save features to file
             if (!featsT || ext_msg != SP_EXTRACTION_SUCCESS) {
                 // TODO: Logger
-                free(imagePath);
-                free(featsPath);
-                free(queryPath);
-                free(imgFeatCount_d);
-                free(imgFeatCount_p);
-                delete proc;
+                freeSPPointsArray(feats, numOfFeats);
+                simpleFree(queryPath, imgFeatCount_d, imgFeatCount_p, imagePath, featsPath);
                 spConfigDestroy(conf);
                 spLoggerDestroy();
-                freeSPPointsArray(feats, numOfFeats);
+                delete proc;
                 exit(0);
             }
             // move features to generall array and destroy the temp array
@@ -181,39 +126,19 @@ int main(int argc, char const *argv[]) {
                 featsCount++;
             }
             free(featsT);
-            // TODO: Logger
         }
-        free(imagePath);
-        free(featsPath);
-        // TODO: Logger
     } else {
         // Non-Extract mode
         printf("1-b. Non-Extraction Mode:\n");
-        featsPath = (char*)malloc(1+CONFIG_LINE_MAX_SIZE*4); // create a big enough buffer
-        if (!featsPath) {
-            // TODO: Logger
-            free(featsPath);
-            free(imgFeatCount_d);
-            free(imgFeatCount_p);
-            freeSPPointsArray(feats, numOfFeats);
-            free(queryPath);
-            spConfigDestroy(conf);
-            spLoggerDestroy();
-            delete proc;
-            exit(0);
-        }
         for (i = 0; i < numOfImages; i++) {
             conf_msg = spConfigGetFeaturesFilePath(featsPath, conf, i);
             featsT = spExtractFromFiles(featsPath, &numOfFeats, &ext_msg);
-            // TODO: Logger
-            if (conf_msg != SP_CONFIG_SUCCESS || ext_msg != SP_EXTRACTION_SUCCESS ||  featsT == NULL) {
-                free(featsPath);
-                free(queryPath);
-                free(imgFeatCount_d);
-                free(imgFeatCount_p);
+            if (conf_msg != SP_CONFIG_SUCCESS || ext_msg != SP_EXTRACTION_SUCCESS) {
+                // TODO: Logger
+                freeSPPointsArray(feats, featsCount);
+                simpleFree(queryPath, imgFeatCount_d, imgFeatCount_p, imagePath, featsPath);
                 spConfigDestroy(conf);
                 spLoggerDestroy();
-                freeSPPointsArray(feats, numOfFeats);
                 delete proc;
                 exit(0);
             }
@@ -222,71 +147,76 @@ int main(int argc, char const *argv[]) {
                 featsCount++;
             }
             free(featsT);
-            // TODO: Logger
         }
-        free(featsPath);
-        // TODO: Logger
     }
+    simpleFree(imagePath, featsPath, NULL, NULL, NULL);
     printf("2. Finished processing - %d features\n", featsCount);
     kdarr = Init(feats, featsCount); // no need to to destroy KDArray (handles in tree creation)
     // at this point no neef ro the SPPoint array (feats)
-    freeSPPointsArray(feats, numOfFeats);
+    freeSPPointsArray(feats, featsCount);
     printf("3. KDArray created\n");
-
     tree = spKDTreeCreate(kdarr, split_method);
     printf("4. KDTree created\n");
-
+    // main query loop
     do {
+      // sanity explained:
+      // ---------------------
+      // It's a mechanism for making sure nothing went wrong without a large amout of exit().
+      // sanity = true -> everything is ok
+      // sanity = false -> something went wrong
+      // Therefor every stage in the program checks is sanity == true.
         if (getLine(queryMsg, queryPath, CONFIG_LINE_MAX_SIZE) != OK) {
-            // TODO: Logger
+            //  TODO: Logger
+            sanity = false;
         } else if (strcmp(queryPath,"<>") != 0) {
             queryCount++;
             printf("5-a. Query image path (%d) recieved : '%s'\n", queryCount, queryPath);
             featsT = proc->getImageFeatures(queryPath, numOfImages+1, &numOfFeats);
-
+            if (!featsT) {
+                // TODO: Logger
+                sanity = false;
+            }
             // reset image result counter array
             for (i=0; i<numOfImages; i++) {
                 imgFeatCount_p[i][0] = i;
                 imgFeatCount_p[i][1] = 0;
             }
             // count image features per feature
-            for (i=0; i<numOfFeats; i++) {
+            for (i=0; i<numOfFeats && sanity; i++) {
                 bpq = spKDTreeFindKNearestNeighbors(tree, spKNN, featsT[i]);
-                bpqSize = spBPQueueSize(bpq);
-                for (j=0; j<bpqSize; j++) {
-                    el = spBPQueuePeek(bpq);
-                    imIndexT = spListElementGetIndex(el);
-                    imgFeatCount_p[imIndexT][1] += 1;
-                    spBPQueueDequeue(bpq);
-                    spListElementDestroy(el);
+                if (!bpq) {
+                    // TODO: Logger
+                    sanity = false;
+                } else {
+                    if (spcbirCountImageProximity(bpq, imgFeatCount_p) < 0) {
+                        // TODO: Logger
+                        sanity = false;
+                    }
+                    spBPQueueDestroy(bpq);
                 }
-                spBPQueueDestroy(bpq);
             }
-            freeSPPointsArray(featsT, numOfFeats); // free the query image features array
-
-            printf("5-b. Calculating %d best similar images\n", spSimIm);
-
-            // sort results to get best images
-            qsort(imgFeatCount_p, numOfImages, sizeof(int*), compare2DInt);
-
-            for (i=0; i<spSimIm; i++) {
-                printf("\t- #%d closes image is %d (%d)\n", i, imgFeatCount_p[i][0], imgFeatCount_p[i][1]);
+            if (featsT) freeSPPointsArray(featsT, numOfFeats);     // free the query image features array
+            if (sanity) {
+                printf("5-b. Calculating %d best similar images\n", spSimIm);
+                // sort results to get best images
+                qsort(imgFeatCount_p, numOfImages, sizeof(int*), compare2DInt);
+                for (i=0; i<spSimIm; i++) {
+                    printf("\t- #%d closes image is %d (%d)\n", i, imgFeatCount_p[i][0], imgFeatCount_p[i][1]);
+                }
             }
         } else {
             // TODO: Logger
             // go to exit phase
         }
-    } while (strcmp(queryPath,"<>") != 0);
+    } while (sanity && strcmp(queryPath,"<>") != 0);
 
     // exit phase
     printf("6. Processed %d queries, preparing to exit\n", queryCount);
     printf("Exiting...\n");
-    free(queryPath);
-    free(imgFeatCount_d);
-    free(imgFeatCount_p);
-    delete proc;
+    simpleFree(queryPath, imgFeatCount_d, imgFeatCount_p, NULL, NULL);
     spKDTreeDestroy(tree);
     spConfigDestroy(conf);
     spLoggerDestroy();
+    delete proc;
     return 0;
 }
