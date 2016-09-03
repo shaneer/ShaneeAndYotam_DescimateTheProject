@@ -47,7 +47,7 @@ void spKDTreeNodeDestroy(SPKDTreeNode node);
  *
  *
  */
-SPKDTreeNode spKDTreeNodeCreate(int dimension, int value, SPKDTreeNode* leftNode, SPKDTreeNode* rightNode, SPPoint* data, SP_NNSEARCH_MSG* msg);
+SPKDTreeNode spKDTreeNodeCreate(int dimension, int value, SPKDTreeNode leftNode, SPKDTreeNode rightNode, SPPoint data, SP_NNSEARCH_MSG* msg);
 
 /**
  * Creates a KD tree
@@ -64,6 +64,6 @@ SPKDTreeNode spCreateKDTree(SPKDArray arr, SP_SPLIT_METHOD method, SP_NNSEARCH_M
 /*
 TODO
 */
-SPBPQueue SPSearchForNeighbors(SPPoint queryPoint, SPKDTreeNode* root, int maxSize, SP_NNSEARCH_MSG* msg);
+SPBPQueue SPSearchForNeighbors(SPPoint queryPoint, SPKDTreeNode root, int maxSize, SP_NNSEARCH_MSG* msg);
 
 #endif // SPKDTREENNSEARCH_H_
