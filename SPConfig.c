@@ -125,7 +125,7 @@ bool loadData(SPConfig res, char* paramName, char* value, const char* filename, 
 	return true;
 }
 
-int checkvalid(SPConfig res, SP_CONFIG_MSG* msg, const char* filename, int lineNum){
+int checkValid(SPConfig res, SP_CONFIG_MSG* msg, const char* filename, int lineNum){
 	printf(">> >> inside checkvalid\n");
 	if (res == NULL){
 		return -1;
@@ -246,8 +246,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 				//FUNCTION THAT LOADS DATA INTO PARAM NAMES
 				successfulLoad = loadData(res, paramName, value, filename, lineNum, msg);
  		}//END OF WHILE LOOP
- //int check = checkvalid(res, msg, filename, lineNum);
- int check = 1; //TODO
+ int check = checkValid(res, msg, filename, lineNum);
  if (!*msg == SP_CONFIG_SUCCESS || check<0){
 	 spConfigDestroy(res);
 	 res = NULL;
