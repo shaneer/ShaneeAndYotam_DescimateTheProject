@@ -28,7 +28,6 @@ void spKDTreeNodeDestroy(SPKDTreeNode node){
   spKDTreeNodeDestroy(right);
   spPointDestroy(data);
   free(node);
-
 }
 
 //TODO
@@ -84,7 +83,17 @@ SPKDTreeNode SPKDTreeNodeGetRight(SPKDTreeNode root){
   return root->right;
 }
 
-//TODO Getter for Value
+/**
+ * A getter for the value of the target node.
+ * Meaning - the value which is the median value at the dim used to split it,
+ * such that its left sub-tree will contain all those nodes with smaller values, and right larger
+ * @param data The target node
+ * @assert(node isn't NULL)
+ *
+ * NULL if node==NULL
+ * otherwise,
+ * @return : the value by which subtrees are split
+ */
 int SPKDTreeNodeGetVal(SPKDTreeNode root){
   assert(root != NULL);
   if (root->val == NULL){ //TODO Check
@@ -226,14 +235,13 @@ void SPKDNNSearch(SPPoint queryPoint, SPKDTreeNode root, SPBPQueue BPQ){ //arr i
   }
 }
 
-SPBPQueue SPSearch(SPPoint queryPoint, SPKDTreeNode root, int maxSize, SP_NNSEARCH_MSG* msg){
+SPBPQueue SPSearchForNeighbors(SPPoint queryPoint, SPKDTreeNode root, int maxSize, SP_NNSEARCH_MSG* msg){
   if (!root || !queryPoint || maxSize<0){
     spKDTreeNodeDestroy(root);
     spPointDestroy(queryPoint);
     *msg = SP_SEARCH_INVALID_ARGUMENT;
     return NULL;
   }
-
   SPBPQueue BPQ;
   BPQ = (SPBPQueue*) malloc(sizeof(*BPQ));
   spBPQueueCreate(maxSize);
@@ -243,7 +251,6 @@ SPBPQueue SPSearch(SPPoint queryPoint, SPKDTreeNode root, int maxSize, SP_NNSEAR
     spPointDestroy(queryPoint);
     return NULL;
   }
-
   else SPKDNNSearch(queryPoint, root, BPQ);
   //spKDTreeNodeDestroy(root);              //LEAVE FOR FURTHER QUERIES
   spPointDestroy(queryPoint);
