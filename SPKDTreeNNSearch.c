@@ -67,26 +67,20 @@ SPKDTreeNode SPKDTreeNodeGetRight(SPKDTreeNode root){
  */
 int SPKDTreeNodeGetVal(SPKDTreeNode root){
   assert(root != NULL);
-  if (!root->val){ //TODO Check
-    return -1;
-  }
   return root->val;
 }
 int SPKDTreeNodeGetDim(SPKDTreeNode root){
   assert(root != NULL);
-  if (!root->dim){ //TODO Check
-    return -1;
-  }
   return root->dim;
 }
 
 //TODO
 bool SPKDTreeNodeIsLeaf(SPKDTreeNode check){
   assert(check != NULL);
-  if (check->data == NULL){
-    return false;
+  if (check->data != NULL){
+    return true;
   }
-  return true;
+  return false;
 }
 
 SPPoint SPKDTreeNodeGetDataPoint(SPKDTreeNode root){
@@ -129,14 +123,12 @@ SPKDTreeNode spKDBuildTree(int prevDim, SPKDArray arr, SP_SPLIT_METHOD method, i
   SPKDTreeNode node= NULL;
   SPKDTreeNode tempLeft=NULL;
   SPKDTreeNode tempRight=NULL;
-  int tempDim = INVALID_NUM;                             //Both ints initialized to -1
+  int tempDim;                             //Both ints initialized to -1
   int tempMedianValue = INVALID_NUM;
   SPPoint tempData = NULL;
   SPKDArray *arrayOfKDArrays;                       //For use in the split method
-  int medianIndex = (spKDArrayGetSize(arr)-1)/2;       // Find ciel(n/2) index
+  //int medianIndex = (spKDArrayGetSize(arr)-1)/2;       // Find ciel(n/2) index
   srand((unsigned int)time(NULL));                  //TODO Does this need to be closed?
-
-  printf("\n All variabls declared: \n"); //TODO REMOVE PRINT
 
   //If size of our array is 1 we have reached a leaf: create and return a node with value of point in array
   if (spKDArrayGetSize(arr)==1){
@@ -148,9 +140,7 @@ SPKDTreeNode spKDBuildTree(int prevDim, SPKDArray arr, SP_SPLIT_METHOD method, i
       spKDArrayDestroy(arr);
       return NULL;
     }
-    printf("\n about to create leaf node with point index: %d: \n",spPointGetIndex(tempData) ); //TODO REMOVE PRINT
-    node = spKDTreeNodeCreate(tempDim, tempMedianValue, tempLeft, tempRight, tempData, msg);
-    printf("\n Node created \n"); //TODO REMOVE PRINT
+    node = spKDTreeNodeCreate(INVALID_NUM, tempMedianValue, tempLeft, tempRight, tempData, msg);
 
     spKDArrayDestroy(arr);
     //Check if creation succeeded:
@@ -174,40 +164,29 @@ SPKDTreeNode spKDBuildTree(int prevDim, SPKDArray arr, SP_SPLIT_METHOD method, i
         case INVALID:
             break;
     }
-
   }
     //We now split the array according to the SPREAD defined, with the median value found
-    printf("array:");//TODO REMOVE
-    for (int i =0; i<spKDArrayGetSize(arr) ;i++){//TODO REMOVE
-      printf("arr[%d] is point with index: %d", i, spPointGetIndex(spKDArrayGetPoint(arr,i)) ); //TODO REMOVE
-    }//TODO REMOVE
-
     arrayOfKDArrays = Split(arr, tempDim);                                       //Creates 2 new arrays
     spKDArrayDestroy(arr);
     tempMedianValue = spKDArrayGetHighestPointValueInDim(arrayOfKDArrays[0], tempDim);
-    printf("\nmedianIndex:%d prevDim:%d, newDim:%d, value:%d \n",medianIndex, prevDim, tempDim, tempMedianValue );  //TODO REMOVE PRINT
 
-    printf("Enter left subtree recursion: \n");  //TODO REMOVE PRINT
     tempLeft = spKDBuildTree(tempDim, arrayOfKDArrays[0], method, d, msg);
     printf("Left sub tree built successfully \n"); //TODO REMOVE PRINT
-    printf("Enter right subtree recursion: \n");  //TODO REMOVE PRINT
     tempRight = spKDBuildTree(tempDim, arrayOfKDArrays[1], method, d, msg);
     printf("Right sub tree built successfully \n"); //TODO REMOVE PRINT
     if (!tempLeft || !tempRight){
-      spKDTreeNodeDestroy(node);
-      spKDArrayDestroy(arrayOfKDArrays[0]);
-      spKDArrayDestroy(arrayOfKDArrays[1]);
-      spPointDestroy(tempData);
-      spKDTreeNodeDestroy(tempLeft);
-      spKDTreeNodeDestroy(tempRight);
-      return NULL;
+        spKDTreeNodeDestroy(node);
+        spKDArrayDestroy(arrayOfKDArrays[0]);
+        spKDArrayDestroy(arrayOfKDArrays[1]);
+        spPointDestroy(tempData);
+        spKDTreeNodeDestroy(tempLeft);
+        spKDTreeNodeDestroy(tempRight);
+        return NULL;
     }
-    printf("TEMP DIM: %d", tempDim);
+    printf("\ntempDim: %d and tempMedianValue: %d\n", tempDim, tempMedianValue);
     node = spKDTreeNodeCreate(tempDim, tempMedianValue, tempLeft, tempRight, tempData, msg);    //Creates node of this level of the tree
     printf("Created point w/median value: %d and dim: %d \n", SPKDTreeNodeGetVal(node), SPKDTreeNodeGetDim(node)); //TODO REMOVE PRINT
-
     spPointDestroy(tempData);
-
     if (!node){
       return NULL;
     }
@@ -305,28 +284,34 @@ SPBPQueue SPSearchForNeighbors(SPPoint queryPoint, SPKDTreeNode root, int maxSiz
   }
   return BPQ;
 }
-
-void SPKDTreePrintTree(SPKDTreeNode root, const char* filepath, int level, char* tab){
-  FILE* fp = fopen(filepath, "w");
+void SPKDTreePrintNode(SPKDTreeNode root, const FILE fp, char* tab){
   char* bar = "---------------";
 
-  fprintf(fp, "\n%s, %s" , tab, bar);
+  fprintf(fp, "\n%s %s" , tab, bar);
   fprintf(fp, "\n%s Dim: %d", tab, SPKDTreeNodeGetDim(root));
-  fprintf(fp, "\n%s Val: %d", tab, SPKDTreeNodeGetDim(root));
+  fprintf(fp, "\n%s Val: %d", tab, SPKDTreeNodeGetVal(root));
   if (SPKDTreeNodeIsLeaf(root)){
-    fprintf(fp, "\n%s Index: %d", tab, SPKDTreeNodeGetDim(root));
+    fprintf(fp, "\n%s Index: %d", tab, (int) spPointGetAxisCoor(SPKDTreeNodeGetDataPoint(root),SPKDTreeNodeGetDim(root)));
   }
+  fprintf(fp, "\n%s %s" , tab, bar);
+  return;
+}
+
+void SPKDTreePrintTree(SPKDTreeNode root, FILE fp, int level, char* tab){
+  SPKDTreePrintNode(root, fp, tab);
+
   if (SPKDTreeNodeGetLeft(root) != NULL){
     for (int i=0; i<=level; i++ ){
       tab++;
     }
-    SPKDTreePrintTree(SPKDTreeNodeGetLeft(root), filepath, level+1, tab);
+    SPKDTreePrintTree(SPKDTreeNodeGetLeft(root), fp, level+1, tab);
   }
   if (SPKDTreeNodeGetRight(root)!=NULL){
     for (int i=0; i<=level; i++ ){
       tab = strcat(tab, "\t");
     }
-    SPKDTreePrintTree(SPKDTreeNodeGetRight(root), filepath, level+1, tab);
+    SPKDTreePrintTree(SPKDTreeNodeGetRight(root), fp, level+1, tab);
   }
   fclose(fp);
+  return;
 }

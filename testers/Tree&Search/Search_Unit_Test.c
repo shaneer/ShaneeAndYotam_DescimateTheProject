@@ -38,20 +38,30 @@ int main() {
   pnts[3] = d;
   pnts[4] = e;
 
-  printf("\n Array of points created. Point a : %.2f , %.2f", spPointGetAxisCoor(pnts[0],0), spPointGetAxisCoor(pnts[0],1));
   SPKDArray arr = Init(pnts, 5);
-  printf("\n Array written to file\n");
-
   SP_NNSEARCH_MSG message = SP_NODE_SUCCESS;
-  printf("\n Message set to node success\n" );
 
   root = spCreateKDTree(arr, INCREMENTAL, &message);
-
   if(message == success){
     printf("Success buidling tree!\n");
   }
+  char* bar = "---------------";
 
-  SPKDTreePrintTree(root, "./testOut.txt", 0, "\t\t\t\t\t\t\t");
+  printf("\n   Root Node:");
+  printf("\n %s" ,bar);
+  printf("\n\t Dim: %d", SPKDTreeNodeGetDim(root));
+  printf("\n\t Val: %d", SPKDTreeNodeGetVal(root));
+  if (SPKDTreeNodeIsLeaf(root)){
+    printf("Data Point:");
+    SPPoint data;
+    data = SPKDTreeNodeGetDataPoint(root);
+    printf("\n\t Index: %d", spPointGetIndex(data));
+  }
+  printf("\n%s\n" ,bar);
+
+  char* filepath = "./testOut.txt";
+  FILE* fp = fopen(filepath, "w");
+  SPKDTreePrintTree(root, fp, 0, "\t\t\t\t\t\t\t\t\t\t\t\t\t");
   spPointDestroy(pnts[0]);
   spPointDestroy(pnts[1]);
   spPointDestroy(pnts[2]);
