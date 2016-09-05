@@ -82,7 +82,7 @@ SPConfig spcbirOpenConfigFile(const char* filename) {
     return conf;
 }
 
-SP_CONFIG_MSG spcbirGetValuesFromConfig(SPConfig conf, int* numOfImages, int* numOfFeats, int* spKNN, int* spSimIm, bool* extraction_mode, SP_SPLIT_METHOD* split_method, char** loggerPath, SP_LOGGER_LEVEL* loggerLevel) {
+SP_CONFIG_MSG spcbirGetValuesFromConfig(SPConfig conf, int* numOfImages, int* numOfFeats, int* spKNN, int* spSimIm, bool* extraction_mode, SP_SPLIT_METHOD* split_method, char** loggerPath, SP_LOGGER_LEVEL* loggerLevel, bool* minimalGui) {
     SP_CONFIG_MSG conf_msg;
     *numOfImages = spConfigGetNumOfImages(conf, &conf_msg);
     if (conf_msg != SP_CONFIG_SUCCESS) {
@@ -113,6 +113,10 @@ SP_CONFIG_MSG spcbirGetValuesFromConfig(SPConfig conf, int* numOfImages, int* nu
         return conf_msg;
     }
     *loggerLevel = spConfigGetLoggerLevel(conf, &conf_msg);
+    if (conf_msg != SP_CONFIG_SUCCESS) {
+        return conf_msg;
+    }
+    *minimalGui = spConfigMinimalGui(conf, &conf_msg);
     if (conf_msg != SP_CONFIG_SUCCESS) {
         return conf_msg;
     }

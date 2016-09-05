@@ -34,7 +34,7 @@ int main(int argc, char const *argv[]) {
     SPKDTreeNode tree;
     SPBPQueue bpq;
     int** imgFeatCount_p, *imgFeatCount_d;
-    bool extraction_mode, sanity = true;
+    bool extraction_mode, minimalGui, sanity = true;
     SP_SPLIT_METHOD split_method;
     SP_LOGGER_LEVEL loggerLevel;
     SP_EXTRACTION_MSG ext_msg;
@@ -55,7 +55,7 @@ int main(int argc, char const *argv[]) {
     }
 
     // get attributes from config file for program use
-    conf_msg = spcbirGetValuesFromConfig(conf, &numOfImages, &numOfFeats, &spKNN, &spSimIm, &extraction_mode, &split_method, &loggerPath, &loggerLevel);
+    conf_msg = spcbirGetValuesFromConfig(conf, &numOfImages, &numOfFeats, &spKNN, &spSimIm, &extraction_mode, &split_method, &loggerPath, &loggerLevel, &minimalGui);
     if (conf_msg != SP_CONFIG_SUCCESS) {
         // TODO: Error
         spConfigDestroy(conf);
@@ -89,7 +89,7 @@ int main(int argc, char const *argv[]) {
         delete proc;
         exit(0);
     }
-    printf("0. General memory allocation, and preparation successful\n");
+    // printf("0. General memory allocation, and preparation successful\n");
     // fix pointers for results array
     for (i=0; i<numOfImages; i++) {
         imgFeatCount_p[i] = imgFeatCount_d + 2*i;
@@ -97,7 +97,7 @@ int main(int argc, char const *argv[]) {
 
     if (extraction_mode) {
         // Extract mode
-        printf("1-a. Extraction mode\n");
+        // printf("1-a. Extraction mode\n");
         // go over all pictures and store data in file and in the feats array
         for (i = 0; i < numOfImages; i++) {
             if (spConfigGetFeaturesFilePath(featsPath, conf, i) != SP_CONFIG_SUCCESS || spConfigGetImagePath(imagePath, conf, i) != SP_CONFIG_SUCCESS) {
@@ -129,7 +129,7 @@ int main(int argc, char const *argv[]) {
         }
     } else {
         // Non-Extract mode
-        printf("1-b. Non-Extraction Mode:\n");
+        // printf("1-b. Non-Extraction Mode:\n");
         for (i = 0; i < numOfImages; i++) {
             conf_msg = spConfigGetFeaturesFilePath(featsPath, conf, i);
             featsT = spExtractFromFiles(featsPath, &numOfFeats, &ext_msg);
@@ -149,28 +149,28 @@ int main(int argc, char const *argv[]) {
             free(featsT);
         }
     }
-    simpleFree(imagePath, featsPath, NULL, NULL, NULL);
-    printf("2. Finished processing - %d features\n", featsCount);
+    simpleFree(featsPath, NULL, NULL, NULL, NULL);
+    // printf("2. Finished processing - %d features\n", featsCount);
     kdarr = Init(feats, featsCount); // no need to to destroy KDArray (handles in tree creation)
     // at this point no neef ro the SPPoint array (feats)
     freeSPPointsArray(feats, featsCount);
-    printf("3. KDArray created\n");
+    // printf("3. KDArray created\n");
     tree = spKDTreeCreate(kdarr, split_method);
-    printf("4. KDTree created\n");
+    // printf("4. KDTree created\n");
     // main query loop
     do {
-      // sanity explained:
-      // ---------------------
-      // It's a mechanism for making sure nothing went wrong without a large amout of exit().
-      // sanity = true -> everything is ok
-      // sanity = false -> something went wrong
-      // Therefor every stage in the program checks is sanity == true.
+        // sanity explained:
+        // ---------------------
+        // It's a mechanism for making sure nothing went wrong without a large amout of exit().
+        // sanity = true -> everything is ok
+        // sanity = false -> something went wrong
+        // Therefor every stage in the program checks is sanity == true.
         if (getLine(queryMsg, queryPath, CONFIG_LINE_MAX_SIZE) != OK) {
             //  TODO: Logger
             sanity = false;
         } else if (strcmp(queryPath,"<>") != 0) {
             queryCount++;
-            printf("5-a. Query image path (%d) recieved : '%s'\n", queryCount, queryPath);
+            // printf("5-a. Query image path (%d) recieved : '%s'\n", queryCount, queryPath);
             featsT = proc->getImageFeatures(queryPath, numOfImages+1, &numOfFeats);
             if (!featsT) {
                 // TODO: Logger
@@ -195,13 +195,26 @@ int main(int argc, char const *argv[]) {
                     spBPQueueDestroy(bpq);
                 }
             }
-            if (featsT) freeSPPointsArray(featsT, numOfFeats);     // free the query image features array
+            if (featsT) freeSPPointsArray(featsT, numOfFeats);     // free the query image features array when needed
             if (sanity) {
-                printf("5-b. Calculating %d best similar images\n", spSimIm);
+                // printf("5-b. Calculating %d best similar images\n", spSimIm);
                 // sort results to get best images
                 qsort(imgFeatCount_p, numOfImages, sizeof(int*), compare2DInt);
-                for (i=0; i<spSimIm; i++) {
-                    printf("\t- #%d closes image is %d (%d)\n", i, imgFeatCount_p[i][0], imgFeatCount_p[i][1]);
+                if (!minimalGui) printf("Best candidates for - %s - are:\n", queryPath);
+                // loop over the needed results and display them
+                for (i=0; sanity && i < spSimIm; i++) {
+                    if (spConfigGetImagePath(imagePath, conf, imgFeatCount_p[i][0]) != SP_CONFIG_SUCCESS) {
+                        // TODO: Logger
+                        sanity = false;
+                    } else {
+                        if (minimalGui) {
+                            // TODO: MinimalGui
+                            proc->showImage(imagePath);
+                        } else {
+                            printf("%s\n", imagePath);
+                            // printf("\t- #%d closes image is %d (%d)\n", i, imgFeatCount_p[i][0], imgFeatCount_p[i][1]);
+                        }
+                    }
                 }
             }
         } else {
@@ -211,9 +224,9 @@ int main(int argc, char const *argv[]) {
     } while (sanity && strcmp(queryPath,"<>") != 0);
 
     // exit phase
-    printf("6. Processed %d queries, preparing to exit\n", queryCount);
+    // printf("6. Processed %d queries, preparing to exit\n", queryCount);
     printf("Exiting...\n");
-    simpleFree(queryPath, imgFeatCount_d, imgFeatCount_p, NULL, NULL);
+    simpleFree(imagePath, queryPath, imgFeatCount_d, imgFeatCount_p, NULL);
     spKDTreeDestroy(tree);
     spConfigDestroy(conf);
     spLoggerDestroy();
