@@ -5,7 +5,7 @@
 #include <ctype.h>
 #include "SPConfig.h"
 #include <assert.h>
-#include "SPLogger.h"
+//#include "SPLogger.h"
 
 struct sp_config_t{
 	char* spImagesDirectory;
@@ -171,6 +171,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 	SPConfig res;
 	char* temp;
 	char* currLine;
+	char* tempVal;
 	char* value;
 	char* paramName;
 	int lineNum;
@@ -194,6 +195,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 
 		if (temp == NULL || value==NULL || paramName==NULL ||  !res->spPCAFilename || !res->spLoggerFilename
 			|| !res->spImagesSuffix || !res->spImagesPrefix || !res->spImagesDirectory) {
+			free(value);
 			free(temp);
 			free(paramName);
 			spConfigDestroy(res);
@@ -203,6 +205,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 
 	if((fp = fopen(filename, "r")) == NULL){
 		*msg = SP_CONFIG_CANNOT_OPEN_FILE;
+		free(value);
 		free(temp);
 		free(paramName);
 		spConfigDestroy(res);
@@ -230,25 +233,26 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 					continue;
 				}
 				//First we copy the part after the '=' to value
-				strcpy(value, strchr(temp, '='));
+				tempVal = strchr(temp, '=');
+
 				//Now copy param name having already skipped preceeding whitespace, until first space or until '='
 				while ( !isspace(currLine[ind]) && currLine[ind]!= '=' ){
 						paramName[ind] = currLine[ind];
 						ind++;
 				}
 				paramName[ind]='\0';
-				*paramName = *paramName;
-				//We now haveour paramNme  and need only to obtain value string by 'cleaning' the string
-				++value;
-				while (isspace(*value)){
-					++value;
+				//We now have our paramNme  and need only to obtain value string by 'cleaning' the string
+				++tempVal;
+				while (isspace(*tempVal)){
+					++tempVal;
 				}
-				//Remove spaces at end
-				int end = strlen(value)-1;
-				while (isspace(value[end])){
-					--end;
+				printf("\ntempVal:{%s}\n", tempVal);//TODO REMOVE
+				int indV = 0;
+				while (!isspace(tempVal[indV]) && tempVal != '\0'){
+					value[indV] = tempVal[indV];
+					indV++;
 				}
-				value[end+1]='\0';
+				value[indV]='\0';
 
 				//FUNCTION THAT LOADS DATA INTO PARAM NAMES
 				checkValidLoad = loadData(res, paramName, value, filename, lineNum, msg);
@@ -260,6 +264,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 	 spConfigDestroy(res);
 	 res = NULL;
  }
+  free(value);
 	free(temp);
 	free(paramName);
 	fclose(fp);
