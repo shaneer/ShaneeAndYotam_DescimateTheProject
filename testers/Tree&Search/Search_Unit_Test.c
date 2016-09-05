@@ -59,9 +59,7 @@ int main() {
   }
   printf("\n%s\n" ,bar);
 
-  char* filepath = "./testOut.txt";
-  FILE* fp = fopen(filepath, "w");
-  SPKDTreePrintTree(root, fp, 0, "\t\t\t\t\t\t\t\t\t\t\t\t\t");
+  SPKDTreePrintTree(root);
   spPointDestroy(pnts[0]);
   spPointDestroy(pnts[1]);
   spPointDestroy(pnts[2]);

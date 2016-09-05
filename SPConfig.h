@@ -73,13 +73,10 @@ typedef struct sp_config_t* SPConfig;
  */
 SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg);
 
- // TODO
-int checkvalid(SPConfig res, SP_CONFIG_MSG* msg, const char* filename, int lineNum);
 
-/**
- * PRINT FUNCTIONS since logger is not yet initiialized
- */
-void printConstraintsNotMet(const char* filename, int lineNum);
+ // PRINT FUNCTIONS since logger is not yet initiialized
+
+void printConstraintsNotMet(const char* filename, int numOfValue);
 
 void printInvalidLine(const char* filename, int lineNum);
 
@@ -91,7 +88,7 @@ void setDefaults(SPConfig config);
 /**
  * TODO
  */
-int readInt(char* value, int maxLength, int minLength, const char* filename, int lineNum, SP_CONFIG_MSG* msg);
+int readInt(char* value, int maxLength, int minLength, const char* filename, int lineNum, SP_CONFIG_MSG* msg, int numOfValue);
   /**
    * TODO
    */

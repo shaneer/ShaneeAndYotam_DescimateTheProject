@@ -25,130 +25,132 @@ struct sp_config_t{
 };
 
 //Check the paramNames to see if the name fits any and if so assign proper value
-bool loadData(SPConfig res, char* paramName, char* value, const char* filename, int lineNum, SP_CONFIG_MSG* msg){
+int loadData(SPConfig res, char* paramName, char* value, const char* filename, int lineNum, SP_CONFIG_MSG* msg){
 	//TEMPORARY VALUE FOR VALIDITY CHECKS
 	int tempVal;
+
 	if (strcmp(paramName, "spImagesDirectory")==0) {
 		res->spImagesDirectory = readStr(value, filename, lineNum, msg);
 		if (res->spImagesDirectory == NULL){
-			return false;
+			return 4;
 		}
+		return 0;
 	}
 	else if (strcmp(paramName, "spImagesPrefix")==0) {
 		res->spImagesPrefix = readStr(value, filename, lineNum, msg);
 		if (res->spImagesPrefix == NULL){
-			return false;
+			return 4;
 		}
+		return 1;
 	}
 	else if (strcmp(paramName, "spImagesSuffix")==0) {
 		res->spImagesSuffix = readSuffix(value, filename, lineNum, msg);
 		if (res->spImagesSuffix == NULL){
-			return false;
+			return 4;
 		}
+		return 2;
 	}
 	else if (strcmp(paramName, "spNumOfImages")==0) {
-		tempVal = readInt(value, INT_MAX, 0, filename, lineNum, msg);
+		tempVal = readInt(value, INT_MAX, 0, filename, lineNum, msg, 4);
 		if (tempVal == -1){
-			return false;
+			return 4;
 		}
 		res->spNumOfImages = tempVal;
+		return 3;
 	}
 	else if (strcmp(paramName, "spPCADimension")==0) {
-		tempVal = readInt(value, 28, 10, filename, lineNum, msg);
+		tempVal = readInt(value, 28, 10, filename, lineNum, msg, 5);
 		if (tempVal == -1){
-			return false;
+			return 4;
 		}
 		res->spPCADimension = tempVal;
 	}
 	else if (strcmp(paramName, "spPCAFilename")==0) {
 		res->spPCAFilename = readStr(value, filename, lineNum, msg);
 		if (res->spPCAFilename == NULL){
-			return false;
+			return 4;
 		}
 	}
 	else if (strcmp(paramName, "spNumOfFeatures")==0) {
-		tempVal = readInt(value, INT_MAX, 0, filename, lineNum, msg);
+		tempVal = readInt(value, INT_MAX, 0, filename, lineNum, msg, 7);
 		if (tempVal == -1){
-			return false;
+			return 4;
 		}
 		res->spNumOfFeatures = tempVal;
 	}
 	else if (strcmp(paramName, "spExtractionMode")==0) {
 		res->spExtractionMode = readBool(value, filename, lineNum, msg);
 		if (res->spExtractionMode == -1){
-			return false;
+			return 4;
 		}
 	}
 	else if (strcmp(paramName, "spNumOfSimilarImages")==0) {
-		tempVal = readInt(value, INT_MAX, 1, filename, lineNum, msg);
+		tempVal = readInt(value, INT_MAX, 1, filename, lineNum, msg, 9);
 		if (tempVal == -1){
-			return false;
+			return 4;
 		}
 		res->spNumOfSimilarImages = tempVal;
 	}
 	else if (strcmp(paramName, "spKDTreeSplitMethod")==0) {
 		res->spKDTreeSplitMethod = readEnum(value, filename, lineNum, msg);
 		if (res->spKDTreeSplitMethod == INVALID){
-			return false;
+			return 4;
 		}
 	}
 	else if (strcmp(paramName, "spKNN")==0) {
-		tempVal = readInt(value, INT_MAX, 1, filename, lineNum, msg);
+		tempVal = readInt(value, INT_MAX, 1, filename, lineNum, msg, 11);
 		if (tempVal == -1){
-			return false;
+			return 4;
 		}
 		res->spKNN = tempVal;
 	}
 	else if (strcmp(paramName, "spMinimalGUI")==0) {
 		res->spMinimalGUI = readBool(value, filename, lineNum, msg);
 		if (res->spMinimalGUI == -1){
-			return false;
+			return 4;
 		}
 	}
 	else if (strcmp(paramName, "spLoggerLevel")==0) {
-		tempVal = readInt(value, 4, 1, filename, lineNum, msg);
+		tempVal = readInt(value, -1, 1, filename, lineNum, msg, 13);
 		if (tempVal == -1){
-			return false;
+			return 4;
 		}
 		res->spLoggerLevel = tempVal;
 	}
 	else if (strcmp(paramName, "spLoggerFilename")==0) {
 		res->spLoggerFilename = readStr(value, filename, lineNum, msg);
 		if (res->spLoggerFilename == NULL){
-			return false;
+			return 4;
 		}
 	}
 	else {
 	*msg = SP_CONFIG_INVALID_LINE;
-	return false;
+	return 4;
 	}
-	return true;
+	return 5;
 }
 
-int checkValid(SPConfig res, SP_CONFIG_MSG* msg, const char* filename, int lineNum){
-	printf(">> >> inside checkvalid\n");
-	if (res == NULL){
-		return -1;
-	}
-	if (strcmp(res->spImagesDirectory, " ")==0){
+int checkNonDefaultsSet(bool chechValid[6], SP_CONFIG_MSG* msg, const char* filename, int lineNum){
+
+	if (chechValid[0] == false){
 		printParamNotSet(filename, lineNum, "spImagesDirectory");
 		//terminateDuringParse(res, temp, paramName, value, fp, msg, SP_CONFIG_MISSING_DIR);
 		*msg = SP_CONFIG_MISSING_DIR;
 		return -1;
 	}
-	else if (strcmp(res->spImagesPrefix, " ")==0){
+	else if (chechValid[1] == false){
 		printParamNotSet(filename, lineNum, "spImagesPrefix");
 		//terminateDuringParse(res, temp, paramName, value, fp, msg, SP_CONFIG_MISSING_PREFIX);
 		*msg = SP_CONFIG_MISSING_PREFIX;
 		return -1;
 	}
-	else if (strcmp(res->spImagesSuffix, " ")==0){
+	else if (chechValid[2] == false){
 		printParamNotSet(filename, lineNum, "spImagesSuffix");
 		//terminateDuringParse(res, temp, paramName, value, fp, msg, SP_CONFIG_MISSING_SUFFIX);
 		*msg = SP_CONFIG_MISSING_SUFFIX;
 		return -1;
 	}
-	else if ( res->spNumOfImages==-1){
+	else if ( chechValid[3] == false){
 		printParamNotSet(filename, lineNum, "spNumOfImages");
 		//terminateDuringParse(res, temp, paramName, value, fp, msg, SP_CONFIG_MISSING_NUM_IMAGES);
 		*msg = SP_CONFIG_MISSING_NUM_IMAGES;
@@ -166,7 +168,8 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 	char* value;
 	char* paramName;
 	int lineNum;
-	bool successfulLoad;
+	int checkValidLoad;
+	bool checkValid[6] = {false, false, false, false, true, true};  //First four ar enon-defaults, fifth checks for errors and 6th is irrelevant toggle
 
 
 	res = (SPConfig) malloc(sizeof(*res));
@@ -209,30 +212,29 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 	setDefaults(res);
 	//We now have a config object with all defaults set, we initialize line counter and begin to review file.
 	lineNum = 0;
-	//ASSUME success
-	//*msg = SP_CONFIG_SUCCESS;
-	successfulLoad = true;
-	while(fgets(temp, CONFIG_LINE_MAX_SIZE, fp) != NULL && feof(fp) == 0  && successfulLoad) {
+	//ASSUME succes
+	*msg = SP_CONFIG_SUCCESS;
+	while(fgets(temp, CONFIG_LINE_MAX_SIZE, fp) != NULL && feof(fp) == 0  && *msg == SP_CONFIG_SUCCESS && checkValid[4]==true) {
 				lineNum++;															//Count starts at 1
 				//Skips over spaces,  comments and newlines
 				currLine = temp;
 				int ind=0;
 				while (isspace(*currLine)){
 					++currLine;
-					++ind;
 				}
 				if (*currLine == '#'||*currLine =='\n'||*currLine =='\0') {		//Skips comments 'newline's and emptylines
 					continue;
 				}
-				//Copys param name skipping preceeding whitespace, until first space or until '='
-				while (!(isspace(temp[ind])||temp[ind]=='=')){
-						paramName[ind]=temp[ind];
+				//First we copy the part after the '=' to value
+				strcpy(value, strchr(temp, '='));
+				//Now copy param name having already skipped preceeding whitespace, until first space or until '='
+				while ( !isspace(currLine[ind]) && currLine[ind]!= '=' ){
+						paramName[ind] = currLine[ind];
 						ind++;
 				}
 				paramName[ind]='\0';
-
-				strcpy(value, strchr(currLine, '='));
-				//We now have temp which we will use to discover which param to use, and value which starts at =
+				printf(" paramName is : \n%s\n",paramName); //TODO REMOVE
+				//We now haveour paramNme  and need only to obtain value string by 'cleaning' the string
 				++value;
 				while (isspace(*value)){
 					++value;
@@ -243,16 +245,19 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 					--end;
 				}
 				value[end+1]='\0';
+				printf("value copied, value is : %s\n", value);//TODO REMOVE
+
 				//FUNCTION THAT LOADS DATA INTO PARAM NAMES
-				successfulLoad = loadData(res, paramName, value, filename, lineNum, msg);
+				checkValidLoad = loadData(res, paramName, value, filename, lineNum, msg);
+				checkValid[checkValidLoad] = (checkValid[checkValidLoad]+1)%2;
  		}//END OF WHILE LOOP
- int check = checkValid(res, msg, filename, lineNum);
- if (!*msg == SP_CONFIG_SUCCESS || check<0){
+
+ checkValidLoad = checkNonDefaultsSet(checkValid, msg, filename, lineNum);
+ if (!*msg == SP_CONFIG_SUCCESS || checkValidLoad<0){
 	 spConfigDestroy(res);
 	 res = NULL;
  }
 	free(temp);
-	free(value);
 	free(paramName);
 	fclose(fp);
 	return res;
@@ -260,8 +265,8 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 
 
 //PRINTING ERROR MESSAGES TO CONSOLE
-void printConstraintsNotMet(const char* filename, int lineNum){
-	printf("File: %s\nLine: %d\nMessage: Invalid value - constraint not met",filename, lineNum );
+void printConstraintsNotMet(const char* filename, int numOfValue){
+	printf("File: %s\nLine: %d\nMessage: Invalid value - constraint not met",filename, numOfValue );
 }
 void printInvalidLine(const char* filename, int lineNum){
 	printf("File: %s\nLine: %d\nMessage: Invalid configuration line",filename, lineNum );
@@ -273,18 +278,6 @@ void printParamNotSet(const char* filename, int lineNum, char* paramName){
 
 //HELPER FUNCTIONS TO LOAD DATA FROM STRING FORN IN CONFIG LINE
 void setDefaults(SPConfig config){
-	//ALLOC MEM FOR ALL STRING VALUES
-	// config->spPCAFilename = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
-	// config->spLoggerFilename = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
-	// config->spImagesSuffix = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
-	// config->spImagesPrefix = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
-	// config->spImagesDirectory = (char*) malloc(CONFIG_LINE_MAX_SIZE+1);
-
-	// if (config->spPCAFilename == NULL || config->spLoggerFilename == NULL || config->spImagesSuffix == NULL ||
-	// config->spImagesPrefix == NULL || config->spImagesDirectory == NULL ){
-	// 	spConfigDestroy(config);
-	// 	return -1;
-	// }
 
 	config->spPCADimension = 20;
 	strcpy(config->spPCAFilename, "pca.yml");
@@ -306,7 +299,7 @@ void setDefaults(SPConfig config){
 	//return 0;
 	}
 
-int readInt(char* value, int maxLength, int minLength, const char* filename, int lineNum, SP_CONFIG_MSG* msg){
+int readInt(char* value, int maxLength, int minLength, const char* filename, int lineNum, SP_CONFIG_MSG* msg, int NumOfValue){
 	int num;
 	if (isValidInt(value)){
 		num = atoi(value);
@@ -318,7 +311,7 @@ int readInt(char* value, int maxLength, int minLength, const char* filename, int
 	if( minLength <= num && num<=maxLength ){
 		return num;
 	}else {
-		printConstraintsNotMet(filename, lineNum);
+		printConstraintsNotMet(filename, NumOfValue);
 		*msg = SP_CONFIG_INVALID_INTEGER;
 		return -1;
 	}
@@ -511,25 +504,33 @@ int spConfigGetPCADim(const SPConfig config, SP_CONFIG_MSG* msg){
 /*
 //TODO - !
 SP_CONFIG_MSG spConfigGetImagePath(char* imagePath, const SPConfig config,int index){
-return SP_CONFIG_SUCCESS;
+
+	return SP_CONFIG_SUCCESS;
  }
 
 SP_CONFIG_MSG spConfigGetPCAPath(char* pcaPath, const SPConfig config){
-return SP_CONFIG_SUCCESS;
-//TODO
-}
-*/
+
+	return SP_CONFIG_SUCCESS;
+}*/
+
 
 void spConfigDestroy(SPConfig config){
 	if (!config){
 		return;
 	}
+	printf("Freeing 0" );//TODO REMOVE
+	printf("%s", config->spImagesDirectory);
 	free(config->spImagesDirectory);
+	printf("Freeing 2" );//TODO REMOVE
 	free(config->spImagesPrefix);
+	printf("Freeing 3" );//TODO REMOVE
 	free(config->spImagesSuffix);
+	printf("Freeing 4" );//TODO REMOVE
 	free(config->spPCAFilename);
+	printf("Freeing 5" );//TODO REMOVE
 	free(config->spLoggerFilename);
 	//All other members are Integer values (int, bool, enum) and do not require the use of free()
+	printf("Freeing 6" );//TODO REMOVE
 	free(config);
 	return;
 }
