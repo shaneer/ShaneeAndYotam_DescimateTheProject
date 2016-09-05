@@ -177,6 +177,10 @@ int spConfigGetNumOfFeatures(const SPConfig config, SP_CONFIG_MSG* msg);
  */
 int spConfigGetPCADim(const SPConfig config, SP_CONFIG_MSG* msg);
 
+
+//GETTERS for Image Directory //TODO
+char* spConfigGetImageDirectory(const SPConfig config, SP_CONFIG_MSG* msg);
+
 /**
  * Given an index 'index' the function stores in imagePath the full path of the
  * ith image.
@@ -202,8 +206,7 @@ int spConfigGetPCADim(const SPConfig config, SP_CONFIG_MSG* msg);
  * - SP_CONFIG_INDEX_OUT_OF_RANGE - if index >= spNumOfImages
  * - SP_CONFIG_SUCCESS - in case of success
  */
-SP_CONFIG_MSG spConfigGetImagePath(char* imagePath, const SPConfig config,
-		int index);
+SP_CONFIG_MSG spConfigGetImagePath(char* imagePath, const SPConfig config,int index);
 
 /**
  * The function stores in pcaPath the full path of the pca file.
