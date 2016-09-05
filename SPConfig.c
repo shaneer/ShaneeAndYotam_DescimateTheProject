@@ -36,7 +36,6 @@ int loadData(SPConfig res, char* paramName, char* value, const char* filename, i
 		if (res->spImagesDirectory == NULL){
 			return 4;
 		}
-		printf("\nSET SPIMAGES DIRECTORY TO BE : {%s}\n", res->spImagesDirectory); //TODO REMOVE
 		return 0;
 	}
 	else if (strcmp(paramName, "spImagesPrefix")==0) {
@@ -45,7 +44,6 @@ int loadData(SPConfig res, char* paramName, char* value, const char* filename, i
 		if (res->spImagesPrefix == NULL){
 			return 4;
 		}
-		printf("\nSET PREFIX TO BE : {%s}\n", res->spImagesPrefix); //TODO REMOVE
 		return 1;
 	}
 	else if (strcmp(paramName, "spImagesSuffix")==0) {
@@ -54,7 +52,6 @@ int loadData(SPConfig res, char* paramName, char* value, const char* filename, i
 		if (res->spImagesSuffix == NULL){
 			return 4;
 		}
-		printf("\nSET SUffix TO BE : {%s}\n", res->spImagesSuffix); //TODO REMOVE
 		return 2;
 	}
 	else if (strcmp(paramName, "spNumOfImages")==0) {
@@ -174,6 +171,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 	SPConfig res;
 	char* temp;
 	char* currLine;
+	char* tempVal;
 	char* value;
 	char* paramName;
 	int lineNum;
@@ -197,8 +195,8 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 
 		if (temp == NULL || value==NULL || paramName==NULL ||  !res->spPCAFilename || !res->spLoggerFilename
 			|| !res->spImagesSuffix || !res->spImagesPrefix || !res->spImagesDirectory) {
-			free(temp);
 			free(value);
+			free(temp);
 			free(paramName);
 			spConfigDestroy(res);
 			*msg = SP_CONFIG_ALLOC_FAIL;
@@ -207,8 +205,8 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 
 	if((fp = fopen(filename, "r")) == NULL){
 		*msg = SP_CONFIG_CANNOT_OPEN_FILE;
-		free(temp);
 		free(value);
+		free(temp);
 		free(paramName);
 		spConfigDestroy(res);
 		if (strcmp(filename, "spcbir.config")==0){			//Tells us program is using default config, and it's faulty
@@ -235,31 +233,29 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 					continue;
 				}
 				//First we copy the part after the '=' to value
-				strcpy(value, strchr(temp, '='));
+				tempVal = strchr(temp, '=');
+
 				//Now copy param name having already skipped preceeding whitespace, until first space or until '='
 				while ( !isspace(currLine[ind]) && currLine[ind]!= '=' ){
 						paramName[ind] = currLine[ind];
 						ind++;
 				}
 				paramName[ind]='\0';
-				*paramName = *paramName;
-				printf(" paramName is : \n{%s}\n",paramName); //TODO REMOVE
-				//We now haveour paramNme  and need only to obtain value string by 'cleaning' the string
-				++value;
-				while (isspace(*value)){
-					++value;
+				//We now have our paramNme  and need only to obtain value string by 'cleaning' the string
+				++tempVal;
+				while (isspace(*tempVal)){
+					++tempVal;
 				}
-				//Remove spaces at end
-				int end = strlen(value)-1;
-				while (isspace(value[end])){
-					--end;
+				printf("\ntempVal:{%s}\n", tempVal);//TODO REMOVE
+				int indV = 0;
+				while (!isspace(tempVal[indV]) && tempVal != '\0'){
+					value[indV] = tempVal[indV];
+					indV++;
 				}
-				value[end+1]='\0';
-				printf("value copied, value is : {%s}\n", value);//TODO REMOVE
+				value[indV]='\0';
 
 				//FUNCTION THAT LOADS DATA INTO PARAM NAMES
 				checkValidLoad = loadData(res, paramName, value, filename, lineNum, msg);
-				printf("\nPrinting field After Load Data: {%s}\n", spConfigGetImageDirectory(res, msg));
 				checkValid[checkValidLoad] = (checkValid[checkValidLoad]+1)%2;
  		}//END OF WHILE LOOP
 
@@ -268,6 +264,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 	 spConfigDestroy(res);
 	 res = NULL;
  }
+  free(value);
 	free(temp);
 	free(paramName);
 	fclose(fp);
@@ -502,9 +499,9 @@ int spConfigGetPCADim(const SPConfig config, SP_CONFIG_MSG* msg){
 	return num;
 }
 
+
 //TODO
 char* spConfigGetImageDirectory(const SPConfig config, SP_CONFIG_MSG* msg){
-	char * result;
 	if (config == NULL){
 		*msg = SP_CONFIG_INVALID_ARGUMENT;
 		return NULL;
@@ -513,13 +510,11 @@ char* spConfigGetImageDirectory(const SPConfig config, SP_CONFIG_MSG* msg){
 		*msg = SP_CONFIG_MISSING_DIR;
 		return NULL;
 	}
-	result = config->spImagesDirectory;
-	return result;
+	return config->spImagesDirectory;
 }
 
 //TODO
 char* spConfigGetPrefix(const SPConfig config, SP_CONFIG_MSG* msg){
-	char * result;
 	if (config == NULL){
 		*msg = SP_CONFIG_INVALID_ARGUMENT;
 		return NULL;
@@ -528,13 +523,11 @@ char* spConfigGetPrefix(const SPConfig config, SP_CONFIG_MSG* msg){
 		*msg = SP_CONFIG_MISSING_DIR;
 		return NULL;
 	}
-	result = config->spImagesPrefix;
-	return result;
+	return config->spImagesPrefix;
 }
 
 //TODO
 char* spConfigGetSuffix(const SPConfig config, SP_CONFIG_MSG* msg){
-	char * result;
 	if (config == NULL){
 		*msg = SP_CONFIG_INVALID_ARGUMENT;
 		return NULL;
@@ -543,13 +536,11 @@ char* spConfigGetSuffix(const SPConfig config, SP_CONFIG_MSG* msg){
 		*msg = SP_CONFIG_MISSING_DIR;
 		return NULL;
 	}
-	result = config->spImagesSuffix;
-	return result;
+	return config->spImagesSuffix;
 }
 
 //TODO
 char* spConfigGetPCAFilename(const SPConfig config, SP_CONFIG_MSG* msg){
-	char * result;
 	if (config == NULL){
 		*msg = SP_CONFIG_INVALID_ARGUMENT;
 		return NULL;
@@ -558,8 +549,8 @@ char* spConfigGetPCAFilename(const SPConfig config, SP_CONFIG_MSG* msg){
 		*msg = SP_CONFIG_MISSING_DIR;
 		return NULL;
 	}
-	result = config->spPCAFilename;
-	return result;
+	return config->spPCAFilename;
+
 }
 
 //TODO - !
@@ -591,19 +582,12 @@ void spConfigDestroy(SPConfig config){
 	if (!config){
 		return;
 	}
-	printf("Freeing 0\n" );//TODO REMOVE
-	printf("\nPrinting spImagesDriectory: {%s}\n", config->spImagesDirectory);
 	free(config->spImagesDirectory);
-	printf("Freeing 2\n" );//TODO REMOVE
 	free(config->spImagesPrefix);
-	printf("Freeing 3\n" );//TODO REMOVE
 	free(config->spImagesSuffix);
-	printf("Freeing 4\n" );//TODO REMOVE
 	free(config->spPCAFilename);
-	printf("Freeing 5\n" );//TODO REMOVE
 	free(config->spLoggerFilename);
 	//All other members are Integer values (int, bool, enum) and do not require the use of free()
-	printf("Freeing 6\n" );//TODO REMOVE
 	free(config);
 	return;
 }

@@ -5,20 +5,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include "unit_test_util.h"
 #include "SPConfig.h"
 
 
 int main() {
   SP_CONFIG_MSG msg1 = SP_CONFIG_ALLOC_FAIL;
   printf("LET US BEGIN:\n");
-  char* imagepath;
+  char* imagePath;
   char* PCApath;
-  imagepath = (char*) malloc(sizeof(1024));
-  PCApath = (char*) malloc(sizeof(1024));
+  imagePath = (char*) malloc(sizeof(char)*1025);
+  PCApath = (char*) malloc(sizeof(char)*1025);
 
   SPConfig check1 = spConfigCreate("configEX1.txt", &msg1);
-  printf("\nPrinting imDirectory 1: {%s}\n", spConfigGetImageDirectory(check1, &msg1));
+  //printf("\nPrinting imDirectory 1: {%s}\n", spConfigGetImageDirectory(check1, &msg1));
 
   printf("\nCreated successfully\n");
   int numOfImgs = spConfigGetNumOfImages(check1, &msg1);
@@ -30,9 +29,9 @@ int main() {
     printf("\nSuccess!\n");
   }
 
-  spConfigGetImagePath(imagepath, check1, 10);
-  puts(imagepath);
-  free(imagepath);
+  spConfigGetImagePath(imagePath, check1, 10);
+  puts(imagePath);
+  free(imagePath);
 
   spConfigGetPCAPath(PCApath, check1);
   puts(PCApath);
