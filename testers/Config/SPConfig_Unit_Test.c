@@ -23,7 +23,6 @@ int main() {
   if (msgCheck1){
     printf("\nSuccess!\n");
   }
-
   spConfigDestroy(check1);
   return 0;
 }
