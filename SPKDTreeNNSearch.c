@@ -284,34 +284,38 @@ SPBPQueue SPSearchForNeighbors(SPPoint queryPoint, SPKDTreeNode root, int maxSiz
   }
   return BPQ;
 }
-void SPKDTreePrintNode(SPKDTreeNode root, const FILE fp, char* tab){
+void SPKDTreePrintNode(SPKDTreeNode root){
   char* bar = "---------------";
 
-  fprintf(fp, "\n%s %s" , tab, bar);
-  fprintf(fp, "\n%s Dim: %d", tab, SPKDTreeNodeGetDim(root));
-  fprintf(fp, "\n%s Val: %d", tab, SPKDTreeNodeGetVal(root));
+  printf("\n %s" , bar);
+  printf("\n Dim: %d", SPKDTreeNodeGetDim(root));
+  printf("\n Val: %d", SPKDTreeNodeGetVal(root));
   if (SPKDTreeNodeIsLeaf(root)){
-    fprintf(fp, "\n%s Index: %d", tab, (int) spPointGetAxisCoor(SPKDTreeNodeGetDataPoint(root),SPKDTreeNodeGetDim(root)));
+      printf("\n Index: %d", (int) spPointGetAxisCoor(SPKDTreeNodeGetDataPoint(root),SPKDTreeNodeGetDim(root)));
   }
-  fprintf(fp, "\n%s %s" , tab, bar);
+  printf("\n%s" ,bar);
+
   return;
 }
 
-void SPKDTreePrintTree(SPKDTreeNode root, FILE fp, int level, char* tab){
-  SPKDTreePrintNode(root, fp, tab);
+void SPKDTreePrintTree(SPKDTreeNode root){
+  //FILE* fp = fopen(filepath, "w");
+  char* branchLeft = "\n/";
+  char* branchRight = "\n\\";
 
-  if (SPKDTreeNodeGetLeft(root) != NULL){
-    for (int i=0; i<=level; i++ ){
-      tab++;
+
+  printf("\nKDD Tree:\n");
+  SPKDTreePrintNode(root);
+  if (!SPKDTreeNodeIsLeaf(root)){
+    if (SPKDTreeNodeGetLeft(root) != NULL){
+      puts(branchLeft);
+      SPKDTreePrintTree(SPKDTreeNodeGetLeft(root));
     }
-    SPKDTreePrintTree(SPKDTreeNodeGetLeft(root), fp, level+1, tab);
-  }
-  if (SPKDTreeNodeGetRight(root)!=NULL){
-    for (int i=0; i<=level; i++ ){
-      tab = strcat(tab, "\t");
+    if (SPKDTreeNodeGetRight(root) != NULL){
+      puts(branchRight);
+      SPKDTreePrintTree(SPKDTreeNodeGetRight(root));
     }
-    SPKDTreePrintTree(SPKDTreeNodeGetRight(root), fp, level+1, tab);
   }
-  fclose(fp);
+  //fclose(fp);
   return;
 }

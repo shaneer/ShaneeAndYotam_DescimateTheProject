@@ -66,4 +66,9 @@ TODO
 */
 SPBPQueue SPSearchForNeighbors(SPPoint queryPoint, SPKDTreeNode root, int maxSize, SP_NNSEARCH_MSG* msg);
 
+/*
+TODO
+*/
+void SPKDTreePrintTree(SPKDTreeNode root);
+
 #endif // SPKDTREENNSEARCH_H_
