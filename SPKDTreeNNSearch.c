@@ -220,7 +220,6 @@ void SPKDNNSearch(SPPoint queryPoint, SPKDTreeNode root, SPBPQueue BPQ){ //arr i
   if (spBPQueueSize(BPQ)>1){
     maxDistance = spBPQueueMaxValue(BPQ);
   }
-
   if (SPKDTreeNodeIsLeaf(root)){
     //enqueue the index of our given node into bpq
     tempPnt = spPointCopy(SPKDTreeNodeGetDataPoint(root));
@@ -268,7 +267,6 @@ SPBPQueue SPSearchForNeighbors(SPPoint queryPoint, SPKDTreeNode root, int maxSiz
   if (!BPQ ){
     *msg = SP_KDTREE_QUEUE_FAILURE;
     spKDTreeNodeDestroy(root);
-
     spPointDestroy(queryPoint);
     return NULL;
   }
@@ -284,6 +282,7 @@ SPBPQueue SPSearchForNeighbors(SPPoint queryPoint, SPKDTreeNode root, int maxSiz
   }
   return BPQ;
 }
+
 void SPKDTreePrintNode(SPKDTreeNode root){
   char* bar = "---------------";
 
@@ -294,28 +293,5 @@ void SPKDTreePrintNode(SPKDTreeNode root){
       printf("\n Index: %d", (int) spPointGetAxisCoor(SPKDTreeNodeGetDataPoint(root),SPKDTreeNodeGetDim(root)));
   }
   printf("\n%s" ,bar);
-
-  return;
-}
-
-void SPKDTreePrintTree(SPKDTreeNode root){
-  //FILE* fp = fopen(filepath, "w");
-  char* branchLeft = "\n/";
-  char* branchRight = "\n\\";
-
-
-  printf("\nKDD Tree:\n");
-  SPKDTreePrintNode(root);
-  if (!SPKDTreeNodeIsLeaf(root)){
-    if (SPKDTreeNodeGetLeft(root) != NULL){
-      puts(branchLeft);
-      SPKDTreePrintTree(SPKDTreeNodeGetLeft(root));
-    }
-    if (SPKDTreeNodeGetRight(root) != NULL){
-      puts(branchRight);
-      SPKDTreePrintTree(SPKDTreeNodeGetRight(root));
-    }
-  }
-  //fclose(fp);
   return;
 }

@@ -22,25 +22,32 @@
  * A data-structure which is used for configuring the system.
  */
 typedef enum sp_config_msg_t {
-	SP_CONFIG_MISSING_DIR,
-	SP_CONFIG_MISSING_PREFIX,
-	SP_CONFIG_MISSING_SUFFIX,
-	SP_CONFIG_MISSING_NUM_IMAGES,
-	SP_CONFIG_CANNOT_OPEN_FILE,
+	SP_CONFIG_MISSING_DIR,				//The Non-Default field Image Directory is missing
+	SP_CONFIG_MISSING_PREFIX,			//The Non-Default field Prefix is missing
+	SP_CONFIG_MISSING_SUFFIX,			//The Non-Default field Suffix is missing
+	SP_CONFIG_MISSING_NUM_IMAGES,		//The Non-Default field numOfImages is missing
+	SP_CONFIG_CANNOT_OPEN_FILE,			//The Filepath given for the config file cannot be opened
 	SP_CONFIG_INVALID_FILE,				//Invalid config file given
-	SP_CONFIG_FAULTY_DEFAULT,			//No config given and default file is faulty and cannot be opened
 	SP_CONFIG_INVALID_LINE,				//Invalid line in config file: not a comment, assignment or newline
 	SP_CONFIG_ALLOC_FAIL,
 	SP_CONFIG_INVALID_INTEGER,
 	SP_CONFIG_INVALID_STRING,
-	SP_CONFIG_INVALID_VALUE,			//Invalid value given to variable - doesn't match param type
-	//TODO - Warning vs. Error ?
-	SP_CONFIG_REDEFINE,					//Param defined more than once : WARNING?
-	SP_CONFIG_INVALID_ARGUMENT,
+	SP_CONFIG_INVALID_VALUE,			//Invalid value given to variable - doesn't match param constraints
+	SP_CONFIG_INVALID_ARGUMENT,		//Invalid argument type
 	SP_CONFIG_INDEX_OUT_OF_RANGE,
 	SP_CONFIG_SUCCESS
 } SP_CONFIG_MSG;
 
+
+/**
+ * Enum Type to define the Spread by which the tree will be built
+ *
+ * MAX_SPREAD : Spread of the ith dimension is the difference between the max and min of the 𝑖𝑡ℎ coordinate of all points
+ * RANDOM : A random dim is chosen
+ * INCREMENTAL : Each time spread increments by one, circuling back to 0 when it reaches highest dimension
+ * INVALID : Set when the value given cannot be read as one of the valid spreads
+ *
+ */
 typedef enum sp_split_method_t{
 	MAX_SPREAD, RANDOM, INCREMENTAL, INVALID
 }SP_SPLIT_METHOD;
@@ -68,6 +75,20 @@ typedef struct sp_config_t* SPConfig;
  * - SP_CONFIG_MISSING_SUFFIX - if spImagesSuffix is missing
  * - SP_CONFIG_MISSING_NUM_IMAGES - if spNumOfImages is missing
  * - SP_CONFIG_SUCCESS - in case of success
+ SP_CONFIG_MISSING_DIR,				//The Non-Default field Image Directory is missing
+ SP_CONFIG_MISSING_PREFIX,			//The Non-Default field Prefix is missing
+ SP_CONFIG_MISSING_SUFFIX,			//The Non-Default field Suffix is missing
+ SP_CONFIG_MISSING_NUM_IMAGES,		//The Non-Default field numOfImages is missing
+ SP_CONFIG_CANNOT_OPEN_FILE,			//The Filepath given for the config file cannot be opened
+ SP_CONFIG_INVALID_FILE,				//Invalid config file given
+ SP_CONFIG_INVALID_LINE,				//Invalid line in config file: not a comment, assignment or newline
+ SP_CONFIG_ALLOC_FAIL,
+ SP_CONFIG_INVALID_INTEGER,
+ SP_CONFIG_INVALID_STRING,
+ SP_CONFIG_INVALID_VALUE,			//Invalid value given to variable - doesn't match param constraints
+ SP_CONFIG_INVALID_ARGUMENT,		//Invalid argument type
+ SP_CONFIG_INDEX_OUT_OF_RANGE,
+ SP_CONFIG_SUCCESS
  *
  *
  */
