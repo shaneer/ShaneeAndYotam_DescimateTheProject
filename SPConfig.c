@@ -5,7 +5,7 @@
 #include <ctype.h>
 #include "SPConfig.h"
 #include <assert.h>
-//#include "SPLogger.h"
+#include "SPLogger.h"
 
 struct sp_config_t{
 	char* spImagesDirectory;
@@ -136,29 +136,26 @@ int loadData(SPConfig res, char* paramName, char* value, const char* filename, i
 	return 5;
 }
 
+//We use a boolean array to ensure all our non-defaults are set
 int checkNonDefaultsSet(bool chechValid[6], SP_CONFIG_MSG* msg, const char* filename, int lineNum){
 
 	if (chechValid[0] == false){
 		printParamNotSet(filename, lineNum, "spImagesDirectory");
-		//terminateDuringParse(res, temp, paramName, value, fp, msg, SP_CONFIG_MISSING_DIR);
 		*msg = SP_CONFIG_MISSING_DIR;
 		return -1;
 	}
 	else if (chechValid[1] == false){
 		printParamNotSet(filename, lineNum, "spImagesPrefix");
-		//terminateDuringParse(res, temp, paramName, value, fp, msg, SP_CONFIG_MISSING_PREFIX);
 		*msg = SP_CONFIG_MISSING_PREFIX;
 		return -1;
 	}
 	else if (chechValid[2] == false){
 		printParamNotSet(filename, lineNum, "spImagesSuffix");
-		//terminateDuringParse(res, temp, paramName, value, fp, msg, SP_CONFIG_MISSING_SUFFIX);
 		*msg = SP_CONFIG_MISSING_SUFFIX;
 		return -1;
 	}
 	else if ( chechValid[3] == false){
 		printParamNotSet(filename, lineNum, "spNumOfImages");
-		//terminateDuringParse(res, temp, paramName, value, fp, msg, SP_CONFIG_MISSING_NUM_IMAGES);
 		*msg = SP_CONFIG_MISSING_NUM_IMAGES;
 		return -1;
 	}
@@ -178,9 +175,13 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 	int checkValidLoad;
 	bool checkValid[6] = {false, false, false, false, true, true};  //First four ar enon-defaults, fifth checks for errors and 6th is irrelevant toggle
 
+	if (filename == NULL){
+		*msg = SP_CONFIG_INVALID_ARGUMENT;
+	}
 
 	res = (SPConfig) malloc(sizeof(*res));
 	if (res == NULL) {
+		*msg = SP_CONFIG_ALLOC_FAIL;
 		return NULL;
 	}
 
@@ -246,7 +247,6 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 				while (isspace(*tempVal)){
 					++tempVal;
 				}
-				printf("\ntempVal:{%s}\n", tempVal);//TODO REMOVE
 				int indV = 0;
 				while (!isspace(tempVal[indV]) && tempVal != '\0'){
 					value[indV] = tempVal[indV];
@@ -254,7 +254,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg){
 				}
 				value[indV]='\0';
 
-				//FUNCTION THAT LOADS DATA INTO PARAM NAMES
+				//FUNCTION THAT LOADS DATA INTO PARAM NAMES RETURNING A INDEX IN OUR BOOL ARRAY TO CHANGE
 				checkValidLoad = loadData(res, paramName, value, filename, lineNum, msg);
 				checkValid[checkValidLoad] = (checkValid[checkValidLoad]+1)%2;
  		}//END OF WHILE LOOP
@@ -298,9 +298,10 @@ void setDefaults(SPConfig config){
 	config->spLoggerLevel = 3;
 	strcpy(config->spLoggerFilename, "stdout");
 
-	//return 0;
+	return;
 	}
 
+//Helper Function to read int from config line
 int readInt(char* value, int maxLength, int minLength, const char* filename, int lineNum, SP_CONFIG_MSG* msg, int NumOfValue){
 	int num;
 	if (isValidInt(value)){
@@ -319,6 +320,7 @@ int readInt(char* value, int maxLength, int minLength, const char* filename, int
 	}
 }
 
+//Helper Function to read and check string assignmint from config line
 char* readStr(char* val, const char* filename, int lineNum, SP_CONFIG_MSG* msg){
 	if (val == NULL){
 		printInvalidLine(filename, lineNum);
@@ -334,6 +336,7 @@ char* readStr(char* val, const char* filename, int lineNum, SP_CONFIG_MSG* msg){
 	}
 }
 
+//Helper Function to read and check string assignmint from config line
 char* readSuffix(char* val, const char* filename, int lineNum, SP_CONFIG_MSG* msg){
 	if (val == NULL){
 		printInvalidLine(filename, lineNum);
@@ -353,6 +356,7 @@ char* readSuffix(char* val, const char* filename, int lineNum, SP_CONFIG_MSG* ms
 	return NULL;
 }
 
+//Helper Function to read  boolean assignmint from config line
 bool readBool(char* val, const char* filename, int lineNum, SP_CONFIG_MSG* msg){				//TODO - can the user define bool as 0/1 does case matter True/true/tRue??
 	if (val == NULL){
 		printInvalidLine(filename, lineNum);
@@ -375,6 +379,7 @@ bool readBool(char* val, const char* filename, int lineNum, SP_CONFIG_MSG* msg){
 	return -1;
 }
 
+//Helper Function to read and check enum value assignmint from config line
 SP_SPLIT_METHOD readEnum(char* val, const char* filename, int lineNum, SP_CONFIG_MSG* msg){
 	if (val == NULL){
 		printInvalidLine(filename, lineNum);
@@ -404,6 +409,7 @@ SP_SPLIT_METHOD readEnum(char* val, const char* filename, int lineNum, SP_CONFIG
 	return INVALID;
 }
 
+// Helper functino to check validity of a string we want to use as an int value
 bool isValidInt(char *str){
    // Handle empty string or negative "-"
    if (!*str || *str == '-'){
@@ -420,6 +426,7 @@ bool isValidInt(char *str){
    return true;
 }
 
+// Helper functino to check validity of a string we want to use as a string value to be assigned
 bool isValidString(char *str){
    if (!*str){
       return false;
@@ -436,8 +443,7 @@ bool isValidString(char *str){
 	return true;
 }
 
-//GETTERS FOR FIELDS OF CONFIG
-
+//GETTERS FOR FIELDS OF CONFIG STRUCT
 bool spConfigIsExtractionMode(const SPConfig config, SP_CONFIG_MSG* msg){
 	assert( msg != NULL );
 	if (config == NULL){
@@ -458,7 +464,7 @@ bool spConfigMinimalGui(const SPConfig config, SP_CONFIG_MSG* msg){
 	return config->spMinimalGUI;
 
 }
-//TODO
+
 int spConfigGetNumOfImages(const SPConfig config, SP_CONFIG_MSG* msg){
 	assert( msg != NULL );
 	if (config == NULL){
@@ -500,7 +506,6 @@ int spConfigGetPCADim(const SPConfig config, SP_CONFIG_MSG* msg){
 }
 
 
-//TODO
 char* spConfigGetImageDirectory(const SPConfig config, SP_CONFIG_MSG* msg){
 	if (config == NULL){
 		*msg = SP_CONFIG_INVALID_ARGUMENT;
@@ -539,7 +544,6 @@ char* spConfigGetSuffix(const SPConfig config, SP_CONFIG_MSG* msg){
 	return config->spImagesSuffix;
 }
 
-//TODO
 char* spConfigGetPCAFilename(const SPConfig config, SP_CONFIG_MSG* msg){
 	if (config == NULL){
 		*msg = SP_CONFIG_INVALID_ARGUMENT;
@@ -550,10 +554,10 @@ char* spConfigGetPCAFilename(const SPConfig config, SP_CONFIG_MSG* msg){
 		return NULL;
 	}
 	return config->spPCAFilename;
-
 }
+//END OF GETTERS
 
-//TODO - !
+// Function to return the fullImage path of a given index , combinig and returning a fromatted string of a few fields, and the index.
 SP_CONFIG_MSG spConfigGetImagePath(char* imagePath, const SPConfig config, int index){
 	SP_CONFIG_MSG msg;
 	if (config == NULL){
@@ -565,7 +569,7 @@ SP_CONFIG_MSG spConfigGetImagePath(char* imagePath, const SPConfig config, int i
 	return msg;
  }
 
-//TODO
+// Function to return the full PCA filename , combinig and returning a fromatted string of two fields of our struct.
 SP_CONFIG_MSG spConfigGetPCAPath(char* pcaPath, const SPConfig config){
 	SP_CONFIG_MSG msg;
 	if (config == NULL){
@@ -577,7 +581,12 @@ SP_CONFIG_MSG spConfigGetPCAPath(char* pcaPath, const SPConfig config){
 	return msg;
 }
 
-
+/*Function to destroy a config object
+*
+* Frees all previously allocated members of the struct as well as the pointer to the struct itself.
+* @param -  config : struct to be destroyed
+*
+*/
 void spConfigDestroy(SPConfig config){
 	if (!config){
 		return;

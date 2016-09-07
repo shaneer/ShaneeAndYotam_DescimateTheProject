@@ -5,9 +5,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include "SPLogger.h"
+#include "SPLogger.h"
 
-#define CONFIG_LINE_MAX_SIZE 1024		///TODO - maxsize?
+#define CONFIG_LINE_MAX_SIZE 1024
 #define MAX_SUFFIX_LEN 5
 #define MIN_NUM_OF_IMGS 0
 #define MIN_NUM_OF_FEATURES 0
@@ -15,11 +15,13 @@
 #define MAX_DIM 28
 #define MIN_SIMILAR_IMGS 0
 #define MIN_KNN 0
-#define MIN_LENGTH_OF_CONFIG_LINE 8		//"spKNN=1\n"
+#define MIN_LENGTH_OF_CONFIG_LINE 8
 #define MAX_INT_LEN 12
 
 /**
- * A data-structure which is used for configuring the system.
+*Enum Type to define a messag returned to the user, allowing us to glean more information about
+*the program's executiong, especially in case of failure.
+*
  */
 typedef enum sp_config_msg_t {
 	SP_CONFIG_MISSING_DIR,				//The Non-Default field Image Directory is missing
@@ -75,20 +77,7 @@ typedef struct sp_config_t* SPConfig;
  * - SP_CONFIG_MISSING_SUFFIX - if spImagesSuffix is missing
  * - SP_CONFIG_MISSING_NUM_IMAGES - if spNumOfImages is missing
  * - SP_CONFIG_SUCCESS - in case of success
- SP_CONFIG_MISSING_DIR,				//The Non-Default field Image Directory is missing
- SP_CONFIG_MISSING_PREFIX,			//The Non-Default field Prefix is missing
- SP_CONFIG_MISSING_SUFFIX,			//The Non-Default field Suffix is missing
- SP_CONFIG_MISSING_NUM_IMAGES,		//The Non-Default field numOfImages is missing
- SP_CONFIG_CANNOT_OPEN_FILE,			//The Filepath given for the config file cannot be opened
- SP_CONFIG_INVALID_FILE,				//Invalid config file given
- SP_CONFIG_INVALID_LINE,				//Invalid line in config file: not a comment, assignment or newline
- SP_CONFIG_ALLOC_FAIL,
- SP_CONFIG_INVALID_INTEGER,
- SP_CONFIG_INVALID_STRING,
- SP_CONFIG_INVALID_VALUE,			//Invalid value given to variable - doesn't match param constraints
- SP_CONFIG_INVALID_ARGUMENT,		//Invalid argument type
- SP_CONFIG_INDEX_OUT_OF_RANGE,
- SP_CONFIG_SUCCESS
+ * - SP_CONFIG_INVALID_LINE -  in case a line with a mistake is given
  *
  *
  */
@@ -102,35 +91,86 @@ void printConstraintsNotMet(const char* filename, int numOfValue);
 void printInvalidLine(const char* filename, int lineNum);
 
 void printParamNotSet(const char* filename, int lineNum, char* paramName);
+
 /**
- * TODO
+ * A function to set the default fields of the config struct
+ * @param config - the config struct for which we set default fields
+ * @assert msg != NULL
+ * @param msg - pointer in which the msg is stored used to indicate success
+ * @return viod
  */
 void setDefaults(SPConfig config);
 /**
- * TODO
+ * A Helper function for the loading of data. Used to read an argument given to check its validity and convert it
+ * from a string to the correct int, checking it meets the proper constraints
+ *
+ * @param value -  the part of the line (string) that contains the value to be assigned to a param expecting an int
+ * @param - maxLength / minLength - the constraints that need to be met for the  param to be assigned
+ * @param - filename, lineNum, and numOfVale are used for printing error or warning messages to the user in case of failure or
+ *					in case constraints are not met (invvalid value given)
+ * @param msg - pointer in which the msg is stored used to indicate success
+ * @return - int to be stored as value of a certain field of the struct
  */
 int readInt(char* value, int maxLength, int minLength, const char* filename, int lineNum, SP_CONFIG_MSG* msg, int numOfValue);
-  /**
-   * TODO
-   */
+/**
+ * A Helper function for the loading of data. Used to read an argument given to check its validity
+ *
+ * @param value -  the part of the line (string) that contains the value to be assigned to a param expecting a string, needs to be without spaces.
+ * @param - filename, lineNum, and numOfVale are used for printing error or warning messages to the user in case of failure or
+ *					in case constraints are not met (invvalid value given)
+ * @param msg - pointer in which the msg is stored used to indicate success
+ * @return char* (string value) to be assigned to a certain field of the struct
+ */
 char* readStr(char* val, const char* filename, int lineNum, SP_CONFIG_MSG* msg);
 
 
 /**
- * TODO
+ * A Helper function for the loading of data. Used to read an argument given to check
+ * its validity as one of the four optional suffixes
+ *
+ * @param value -  the part of the line (string) that contains the value to be assigned to a param expecting a string, needs to be without spaces.
+ * @param - filename, lineNum, and numOfVale are used for printing error or warning messages to the user in case of failure or
+ *					in case constraints are not met (invvalid value given)
+ * @param msg - pointer in which the msg is stored used to indicate success
+ * @return char* (string value) to be assigned to a the suffix field of the struct
  */
 char* readSuffix(char* val, const char* filename, int lineNum, SP_CONFIG_MSG* msg);
+
 /**
- * TODO
+ * A Helper function for the loading of data. Used to read an argument given to check its validity as a boolean
+ * Only "true" or "false" are accepted.
+ *
+ * @param value -  the part of the line (string) that contains the value to be assigned to a param expecting a string, needs to be without spaces.
+ * @param - filename, lineNum, and numOfVale are used for printing error or warning messages to the user in case of failure or
+ *					in case constraints are not met (invvalid value given)
+ * @param msg - pointer in which the msg is stored used to indicate success
+ * @return - a boolean value to be assigned to a certain field of the struct
+ *
  */
 bool readBool(char* val, const char* filename, int lineNum, SP_CONFIG_MSG* msg);
 /**
- * TODO
+ * A Helper function for the loading of data. Used to read an argument given to check its validity as SPLIT_METHOD enum
+ * Only one of the 4 predefined enum values defined above are accepted.
+ *
+ * @param value -  the part of the line (string) that contains the value to be assigned to a param expecting a string, needs to be without spaces.
+ * @param - filename, lineNum, and numOfVale are used for printing error or warning messages to the user in case of failure or
+ *					in case constraints are not met (invvalid value given)
+ * @param msg - pointer in which the msg is stored used to indicate success
+ * @return - a SP_SPLIT_METHOD value to be assigned to a certain field of the struct
+ *
  */
 SP_SPLIT_METHOD readEnum(char* val, const char* filename, int lineNum, SP_CONFIG_MSG* msg);
 
+/*
+* Helper Functions meant to check the validity of either an int or a string.
+* Ensure there are no spaces and that the value returned is one that could be a potential value for our param's assignment.
+* @param -  char* : a string to be checked
+* @return - true if the value can be used,
+*						false otherwise.
+*/
 bool isValidInt(char *str);
 bool isValidString(char *str);
+
 /*
  * Returns true if spExtractionMode = true, false otherwise.
  *
@@ -199,7 +239,11 @@ int spConfigGetNumOfFeatures(const SPConfig config, SP_CONFIG_MSG* msg);
 int spConfigGetPCADim(const SPConfig config, SP_CONFIG_MSG* msg);
 
 
-//GETTERS for Image Directory //TODO
+/*
+* GETTER for Image Directory
+* @param  -the config from which we want the field.
+* @return a string giving us the field ImageDirectory of our struct
+*/
 char* spConfigGetImageDirectory(const SPConfig config, SP_CONFIG_MSG* msg);
 
 /**
