@@ -2,6 +2,7 @@
  *  KDArray_unit_test test file for Config
  *  Author: Shanee
  */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -131,7 +132,7 @@ int main() {
   spPointDestroy(pnts[4]);
   free(pnts);
   //spPointDestroy(queryPoint);   //DESTROYED IN FUNCTION!
-  //spKDTreeNodeDestroy(root);    //Destroyed in Function
+  spKDTreeNodeDestroy(root);    //Destroyed in Function
   puts("Finished");
   return 0;
 }

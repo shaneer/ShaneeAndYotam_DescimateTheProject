@@ -10,28 +10,13 @@
 #ifndef SPKDTREENNSEARCH_H_
 #define SPKDTREENNSEARCH_H_
 /*
- * List Element Summary
+ * KD Tree and NN Search Summary
  *
- * Implements a list element which contains an index and a double value.
- * An element contains:
- *      int int
- *      double value
- * Two elements e1 and e2 are said to be equal iff:
- *      (e1.index == e2.index) AND (e1.value == e2.value)
- * Element e1 is less than element e2 iff:
- *      (e1.value < e2.value)   OR (e1.value == e2.value AND e1.index < e2.index)
- * Element e1 is greater than element e2 iff:
- *      (e2 is less than e1)
  *
- * The following functions are available
- *	spListElementCreate    - Creates a new element the corresponding int and double value
- *	spListElementCopy      - Creates a new copy of the target element
- *	spListElementDestroy   - Free all memory allocations associated with an element
- *	spListElementcompare   - Compares two elements
- *	spListElementSetIndex  - Sets a new index to the target element
- *  spListElementGetIndex  - Gets a the index of the target  element
- *  spListElementSetValue  - Sets a new value to the target element.
- *  spListElementGetValue  - Gets a the value of the target element
+ *
+ *
+ *
+ *
  */
 
 /** Type used for error reporting in SPKDTreeNode*/
